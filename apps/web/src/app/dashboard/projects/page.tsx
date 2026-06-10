@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, FolderGit2, Circle } from 'lucide-react';
 import api from '@/lib/axios';
+import { useRouter } from 'next/navigation';
 
 interface Workspace {
     id: string;
@@ -33,6 +34,8 @@ export default function ProjectsPage() {
     const [description, setDescription] = useState('');
     const [githubUrl, setGithubUrl] = useState('');
     const [workspaceId, setWorkspaceId] = useState('');
+
+    const router = useRouter();
 
     const { data: workspaces = [] } = useQuery({
         queryKey: ['workspaces'],
@@ -74,7 +77,18 @@ export default function ProjectsPage() {
         mutationFn: async (id: string) => {
             await api.delete(`/projects/${id}`);
         },
-        onSuccess: () => {
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({ queryKey: ['projects'] });
+            const previous = queryClient.getQueryData(['projects']);
+            queryClient.setQueryData(['projects'], (old: Project[]) =>
+                old.filter((p) => p.id !== id),
+            );
+            return { previous };
+        },
+        onError: (_err, _id, context) => {
+            queryClient.setQueryData(['projects'], context?.previous);
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['projects'] });
         },
     });
@@ -114,7 +128,8 @@ export default function ProjectsPage() {
                     {projects.map((project) => (
                         <div
                             key={project.id}
-                            className="border rounded-xl p-4 space-y-3 hover:shadow-sm transition"
+                            onClick={() => router.push(`/dashboard/projects/${project.id}`)}
+                            className="border rounded-xl p-4 space-y-3 hover:shadow-sm transition cursor-pointer"
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-2">
@@ -122,7 +137,10 @@ export default function ProjectsPage() {
                                     <h3 className="font-semibold">{project.name}</h3>
                                 </div>
                                 <button
-                                    onClick={() => deleteMutation.mutate(project.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteMutation.mutate(project.id);
+                                    }}
                                     className="text-muted-foreground hover:text-red-500 transition"
                                 >
                                     <Trash2 className="w-4 h-4" />

@@ -44,7 +44,18 @@ export default function WorkspacesPage() {
         mutationFn: async (id: string) => {
             await api.delete(`/workspaces/${id}`);
         },
-        onSuccess: () => {
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({ queryKey: ['workspaces'] });
+            const previous = queryClient.getQueryData(['workspaces']);
+            queryClient.setQueryData(['workspaces'], (old: Workspace[]) =>
+                old.filter((w) => w.id !== id),
+            );
+            return { previous };
+        },
+        onError: (_err, _id, context) => {
+            queryClient.setQueryData(['workspaces'], context?.previous);
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['workspaces'] });
         },
     });
