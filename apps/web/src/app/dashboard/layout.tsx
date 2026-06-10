@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import LoadingScreen from '@/components/loading-screen';
 
 export default function DashboardLayout({
     children,
@@ -11,14 +12,20 @@ export default function DashboardLayout({
 }) {
     const router = useRouter();
     const { isAuthenticated } = useAuthStore();
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (mounted && !isAuthenticated) {
             router.push('/login');
         }
-    }, [isAuthenticated, router]);
+    }, [mounted, isAuthenticated, router]);
 
-    if (!isAuthenticated) return null;
+    if (!mounted) return <LoadingScreen />;
+    if (!isAuthenticated) return <LoadingScreen />;
 
     return (
         <div className="flex h-screen bg-background">
@@ -39,17 +46,17 @@ export default function DashboardLayout({
                         >
                             {item.label}
                         </a>
-          ))}
-            </nav>
-            <div className="mt-auto">
-                <LogoutButton />
-            </div>
-        </aside>
+                    ))}
+                </nav>
+                <div className="mt-auto">
+                    <LogoutButton />
+                </div>
+            </aside>
 
-      {/* Main content */ }
-    <main className="flex-1 overflow-auto p-6">{children}</main>
-    </div >
-  );
+            {/* Main content */}
+            <main className="flex-1 overflow-auto p-6">{children}</main>
+        </div >
+    );
 }
 
 function LogoutButton() {
@@ -57,8 +64,8 @@ function LogoutButton() {
     const router = useRouter();
 
     const handleLogout = () => {
-        clearAuth();
         document.cookie = 'accessToken=; path=/; max-age=0';
+        clearAuth();
         router.push('/login');
     };
 
