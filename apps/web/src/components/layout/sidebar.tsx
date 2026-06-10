@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from '@/components/theme-toggle';
 import {
     LayoutDashboard,
     FolderOpen,
@@ -35,9 +36,12 @@ export default function Sidebar() {
     return (
         <aside className="w-64 border-r flex flex-col h-screen p-4">
             {/* Logo */}
-            <div className="flex items-center gap-2 mb-8 px-2">
-                <Zap className="w-6 h-6 text-primary" />
-                <span className="text-lg font-bold">DevFlow AI</span>
+            <div className="flex items-center justify-between mb-8 px-2">
+                <div className="flex items-center gap-2">
+                    <Zap className="w-6 h-6 text-primary" />
+                    <span className="text-lg font-bold">DevFlow AI</span>
+                </div>
+                <ThemeToggle />
             </div>
 
             {/* Nav */}
