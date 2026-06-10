@@ -53,4 +53,9 @@ export class NotesController {
   remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.notesService.remove(id, user.id);
   }
+
+  @Get(':id/versions')
+  getVersions(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.notesService.getVersions(id, user.id);
+  }
 }

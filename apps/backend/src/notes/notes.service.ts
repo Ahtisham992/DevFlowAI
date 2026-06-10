@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class NotesService {
@@ -17,17 +18,24 @@ export class NotesService {
     tag?: string,
     projectId?: string,
   ) {
+    if (search) {
+      return this.prisma.$queryRaw`
+        SELECT id, title, tags, "projectId", "createdAt", "updatedAt", content,
+               ts_rank("searchVector", plainto_tsquery('english', ${search})) as rank
+        FROM "Note"
+        WHERE "userId" = ${userId}
+          AND "searchVector" @@ plainto_tsquery('english', ${search})
+          ${projectId ? Prisma.sql`AND "projectId" = ${projectId}` : Prisma.empty}
+          ${tag ? Prisma.sql`AND ${tag} = ANY(tags)` : Prisma.empty}
+        ORDER BY rank DESC
+      `;
+    }
+
     return this.prisma.note.findMany({
       where: {
         userId,
         ...(projectId && { projectId }),
         ...(tag && { tags: { has: tag } }),
-        ...(search && {
-          OR: [
-            { title: { contains: search, mode: 'insensitive' } },
-            { content: { contains: search, mode: 'insensitive' } },
-          ],
-        }),
       },
       orderBy: { updatedAt: 'desc' },
       select: {
@@ -51,20 +59,54 @@ export class NotesService {
 
   async create(userId: string, dto: CreateNoteDto) {
     return this.prisma.note.create({
-      data: { ...dto, userId },
+      data: {
+        ...dto,
+        userId,
+        versions: {
+          create: [
+            {
+              title: dto.title,
+              content: dto.content,
+            },
+          ],
+        },
+      },
     });
   }
 
   async update(id: string, userId: string, dto: UpdateNoteDto) {
-    await this.findOne(id, userId);
+    const existing = await this.findOne(id, userId);
+
+    const newTitle = dto.title ?? existing.title;
+    const newContent =
+      dto.content !== undefined ? dto.content : existing.content;
+
     return this.prisma.note.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        versions: {
+          create: [
+            {
+              title: newTitle,
+              content: newContent,
+            },
+          ],
+        },
+      },
     });
   }
 
   async remove(id: string, userId: string) {
     await this.findOne(id, userId);
     return this.prisma.note.delete({ where: { id } });
+  }
+
+  async getVersions(id: string, userId: string) {
+    await this.findOne(id, userId);
+    return this.prisma.noteVersion.findMany({
+      where: { noteId: id },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

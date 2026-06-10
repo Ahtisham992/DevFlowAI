@@ -9,6 +9,8 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
 import { ProjectsModule } from './projects/projects.module';
 import { NotesModule } from './notes/notes.module';
 
+import { AiModule } from './ai/ai.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -18,6 +20,7 @@ import { NotesModule } from './notes/notes.module';
     WorkspacesModule,
     ProjectsModule,
     NotesModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

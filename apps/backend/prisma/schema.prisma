@@ -53,6 +53,19 @@ model Note {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  searchVector Unsupported("tsvector")?
+  versions  NoteVersion[]
+
+  @@index([searchVector], type: Gin)
+}
+
+model NoteVersion {
+  id        String   @id @default(uuid())
+  title     String
+  content   String?
+  createdAt DateTime @default(now())
+  noteId    String
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }
 
 model Conversation {
