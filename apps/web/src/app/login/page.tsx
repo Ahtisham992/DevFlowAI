@@ -39,6 +39,7 @@ export default function LoginPage() {
                 headers: { Authorization: `Bearer ${authData.accessToken}` },
             });
             setAuth(userData, authData.accessToken, authData.refreshToken);
+            document.cookie = `accessToken=${authData.accessToken}; path=/; max-age=900`;
             router.push('/dashboard');
         } catch {
             setError('Invalid email or password');

@@ -50,6 +50,7 @@ export default function RegisterPage() {
                 headers: { Authorization: `Bearer ${authData.accessToken}` },
             });
             setAuth(userData, authData.accessToken, authData.refreshToken);
+            document.cookie = `accessToken=${authData.accessToken}; path=/; max-age=900`;
             router.push('/dashboard');
         } catch (err: unknown) {
             const message =
