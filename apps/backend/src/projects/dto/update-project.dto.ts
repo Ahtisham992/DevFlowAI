@@ -1,0 +1,19 @@
+import { IsString, IsOptional } from 'class-validator';
+
+export class UpdateProjectDto {
+    @IsString()
+    @IsOptional()
+    name?: string;
+
+    @IsString()
+    @IsOptional()
+    description?: string;
+
+    @IsString()
+    @IsOptional()
+    status?: string;
+
+    @IsString()
+    @IsOptional()
+    githubUrl?: string;
+}
