@@ -1,18 +1,21 @@
 import axios from 'axios';
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: BASE_URL,
+    headers: { 'Content-Type': 'application/json' },
 });
 
-// Inject token on every request
+// Inject access token from localStorage
 api.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        const stored = localStorage.getItem('devflow-auth');
+        if (stored) {
+            const { state } = JSON.parse(stored);
+            if (state?.accessToken) {
+                config.headers.Authorization = `Bearer ${state.accessToken}`;
+            }
         }
     }
     return config;
@@ -27,17 +30,29 @@ api.interceptors.response.use(
             original._retry = true;
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
-                const { data } = await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-                    { refreshToken },
-                );
-                localStorage.setItem('accessToken', data.accessToken);
+                if (!refreshToken) throw new Error('No refresh token');
+
+                const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+                    refreshToken,
+                });
+
+                // Update persisted store
+                const stored = localStorage.getItem('devflow-auth');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    parsed.state.accessToken = data.accessToken;
+                    localStorage.setItem('devflow-auth', JSON.stringify(parsed));
+                }
+
+                // Update cookie
+                document.cookie = `accessToken=${data.accessToken}; path=/; max-age=900`;
                 localStorage.setItem('refreshToken', data.refreshToken);
+
                 original.headers.Authorization = `Bearer ${data.accessToken}`;
                 return api(original);
             } catch {
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                localStorage.clear();
+                document.cookie = 'accessToken=; path=/; max-age=0';
                 window.location.href = '/login';
             }
         }
