@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth.store';
 const pageTitles: Record<string, string> = {
     '/dashboard': 'Dashboard',
     '/dashboard/workspaces': 'Workspaces',
+    '/dashboard/projects': 'Projects',
     '/dashboard/notes': 'Notes',
     '/dashboard/chat': 'AI Chat',
 };

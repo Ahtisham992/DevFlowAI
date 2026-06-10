@@ -11,6 +11,7 @@ import {
     Bot,
     LogOut,
     Zap,
+    FolderGit2
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Workspaces', href: '/dashboard/workspaces', icon: FolderOpen },
+    { label: 'Projects', href: '/dashboard/projects', icon: FolderGit2 },
     { label: 'Notes', href: '/dashboard/notes', icon: FileText },
     { label: 'AI Chat', href: '/dashboard/chat', icon: Bot },
 ];

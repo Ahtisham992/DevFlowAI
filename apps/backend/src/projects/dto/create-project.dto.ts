@@ -1,18 +1,18 @@
 import { IsString, IsOptional, MinLength } from 'class-validator';
 
 export class CreateProjectDto {
-    @IsString()
-    @MinLength(2)
-    name: string;
+  @IsString()
+  @MinLength(2)
+  name: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsString()
-    @IsOptional()
-    githubUrl?: string;
+  @IsString()
+  @IsOptional()
+  githubUrl?: string;
 
-    @IsString()
-    workspaceId: string;
+  @IsString()
+  workspaceId: string;
 }
