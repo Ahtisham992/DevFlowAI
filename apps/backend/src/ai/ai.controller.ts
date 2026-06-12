@@ -31,9 +31,7 @@ export class AiController {
   }
 
   @Post('analyze-code')
-  async analyzeCode(
-    @Body() body: { code: string; model?: string },
-  ) {
+  async analyzeCode(@Body() body: { code: string; model?: string }) {
     return this.aiService.analyzeCode(body.code, body.model);
   }
 
@@ -45,16 +43,12 @@ export class AiController {
   }
 
   @Post('generate-docs')
-  async generateDocs(
-    @Body() body: { code: string; model?: string },
-  ) {
+  async generateDocs(@Body() body: { code: string; model?: string }) {
     return this.aiService.generateDocs(body.code, body.model);
   }
 
   @Post('embeddings')
-  async generateEmbeddings(
-    @Body() body: { text: string; model?: string },
-  ) {
+  async generateEmbeddings(@Body() body: { text: string; model?: string }) {
     return this.aiService.generateEmbeddings(body.text, body.model);
   }
 

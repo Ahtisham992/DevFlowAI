@@ -8,9 +8,49 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { Prisma } from '@prisma/client';
 
+import { AiService } from '../ai/ai.service';
+
 @Injectable()
 export class NotesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private aiService: AiService,
+  ) {}
+
+  private chunkText(text: string, chunkSize = 500, overlap = 100): string[] {
+    const chunks: string[] = [];
+    let i = 0;
+    while (i < text.length) {
+      chunks.push(text.substring(i, i + chunkSize));
+      i += chunkSize - overlap;
+    }
+    return chunks;
+  }
+
+  private async indexNote(noteId: string, content: string | null) {
+    if (!content) return;
+    
+    // Delete old embeddings
+    await this.prisma.noteEmbedding.deleteMany({ where: { noteId } });
+
+    const chunks = this.chunkText(content);
+
+    for (const chunk of chunks) {
+      if (!chunk.trim()) continue;
+
+      try {
+        const { embedding } = await this.aiService.generateEmbeddings(chunk);
+        const embeddingString = `[${embedding.join(',')}]`;
+
+        await this.prisma.$executeRaw`
+          INSERT INTO "NoteEmbedding" (id, "noteId", content, embedding)
+          VALUES (gen_random_uuid(), ${noteId}, ${chunk}, ${embeddingString}::vector)
+        `;
+      } catch (err) {
+        console.error('Failed to index chunk for note', noteId, err);
+      }
+    }
+  }
 
   async findAll(
     userId: string,
@@ -58,7 +98,7 @@ export class NotesService {
   }
 
   async create(userId: string, dto: CreateNoteDto) {
-    return this.prisma.note.create({
+    const note = await this.prisma.note.create({
       data: {
         ...dto,
         userId,
@@ -72,6 +112,11 @@ export class NotesService {
         },
       },
     });
+
+    // Fire and forget indexing
+    this.indexNote(note.id, note.content).catch(console.error);
+
+    return note;
   }
 
   async update(id: string, userId: string, dto: UpdateNoteDto) {
@@ -81,7 +126,7 @@ export class NotesService {
     const newContent =
       dto.content !== undefined ? dto.content : existing.content;
 
-    return this.prisma.note.update({
+    const updatedNote = await this.prisma.note.update({
       where: { id },
       data: {
         ...dto,
@@ -95,6 +140,12 @@ export class NotesService {
         },
       },
     });
+
+    if (dto.content !== undefined) {
+      this.indexNote(updatedNote.id, updatedNote.content).catch(console.error);
+    }
+
+    return updatedNote;
   }
 
   async remove(id: string, userId: string) {

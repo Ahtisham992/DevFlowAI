@@ -51,11 +51,37 @@ export class AiService {
     // Context trimming: Keep only the last 10 messages to prevent token overflow
     const recentHistory = history.slice(-10);
 
-    const messages = recentHistory.map((m) => ({ role: m.role, content: m.content }));
+    const messages = recentHistory.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    // RAG INJECTION
+    let contextTexts = '';
+    try {
+      const { embedding } = await this.generateEmbeddings(message);
+      const embeddingString = `[${embedding.join(',')}]`;
+
+      const similarChunks = await this.prisma.$queryRaw<{ content: string }[]>`
+        SELECT ne.content
+        FROM "NoteEmbedding" ne
+        JOIN "Note" n ON n.id = ne."noteId"
+        WHERE n."userId" = ${userId}
+        ORDER BY ne.embedding <=> ${embeddingString}::vector
+        LIMIT 3
+      `;
+      contextTexts = similarChunks.map((c) => c.content).join('\n---\n');
+    } catch (err) {
+      console.error('Failed to fetch RAG context:', err);
+    }
+
     messages.unshift({
       role: 'system',
-      content:
-        'You are DevFlow AI, a highly skilled and helpful senior software engineer. Provide clear, concise answers with accurate code examples when needed. Format your code blocks with the correct language identifiers.',
+      content: `You are a helpful AI coding assistant named DevFlow AI.
+Here is some context from the user's notes that might be relevant to their query:
+${contextTexts}
+
+Use this context to inform your answer if it is relevant.`,
     });
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -169,8 +195,8 @@ ${code}
       });
 
       if (!res.ok) throw new Error('Ollama request failed');
-      const data = await res.json();
-      return JSON.parse(data.response);
+      const data = (await res.json()) as { response: string };
+      return JSON.parse(data.response) as Record<string, unknown>;
     } catch (error) {
       console.error('Code analysis failed:', error);
       throw new Error('Failed to analyze code');
@@ -203,8 +229,8 @@ ${errorMessage}
         body: JSON.stringify({ model, prompt, format: 'json', stream: false }),
       });
       if (!res.ok) throw new Error('Ollama request failed');
-      const data = await res.json();
-      return JSON.parse(data.response);
+      const data = (await res.json()) as { response: string };
+      return JSON.parse(data.response) as Record<string, unknown>;
     } catch (error) {
       console.error('Code debugging failed:', error);
       throw new Error('Failed to debug code');
@@ -232,7 +258,7 @@ ${code}
         body: JSON.stringify({ model, prompt, stream: false }),
       });
       if (!res.ok) throw new Error('Ollama request failed');
-      const data = await res.json();
+      const data = (await res.json()) as { response: string };
       return { documentation: data.response };
     } catch (error) {
       console.error('Docs generation failed:', error);
@@ -248,7 +274,7 @@ ${code}
         body: JSON.stringify({ model, prompt: text }),
       });
       if (!res.ok) throw new Error('Ollama embeddings request failed');
-      const data = await res.json();
+      const data = (await res.json()) as { embedding: number[] };
       return { embedding: data.embedding };
     } catch (error) {
       console.error('Embeddings generation failed:', error);
@@ -259,7 +285,7 @@ ${code}
   async getModels() {
     try {
       const res = await fetch('http://127.0.0.1:11434/api/tags');
-      const data = await res.json();
+      const data = (await res.json()) as { models: Array<{ name: string }> };
       return data.models || [];
     } catch {
       return [{ name: 'llama3:latest' }];
