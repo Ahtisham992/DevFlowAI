@@ -11,7 +11,10 @@ import {
     Bot,
     LogOut,
     Zap,
-    FolderGit2
+    FolderGit2,
+    Code,
+    Bug,
+    FileSignature
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
@@ -22,6 +25,9 @@ const navItems = [
     { label: 'Projects', href: '/dashboard/projects', icon: FolderGit2 },
     { label: 'Notes', href: '/dashboard/notes', icon: FileText },
     { label: 'AI Chat', href: '/dashboard/chat', icon: Bot },
+    { label: 'Code Analysis', href: '/dashboard/analysis', icon: Code },
+    { label: 'AI Debugger', href: '/dashboard/debug', icon: Bug },
+    { label: 'Docs Generator', href: '/dashboard/docs', icon: FileSignature },
 ];
 
 export default function Sidebar() {

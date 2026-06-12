@@ -30,6 +30,34 @@ export class AiController {
     return this.aiService.streamChat(req.user.id, body, res);
   }
 
+  @Post('analyze-code')
+  async analyzeCode(
+    @Body() body: { code: string; model?: string },
+  ) {
+    return this.aiService.analyzeCode(body.code, body.model);
+  }
+
+  @Post('debug')
+  async debugCode(
+    @Body() body: { code: string; errorMessage: string; model?: string },
+  ) {
+    return this.aiService.debugCode(body.code, body.errorMessage, body.model);
+  }
+
+  @Post('generate-docs')
+  async generateDocs(
+    @Body() body: { code: string; model?: string },
+  ) {
+    return this.aiService.generateDocs(body.code, body.model);
+  }
+
+  @Post('embeddings')
+  async generateEmbeddings(
+    @Body() body: { text: string; model?: string },
+  ) {
+    return this.aiService.generateEmbeddings(body.text, body.model);
+  }
+
   @Get('conversations')
   getConversations(@Req() req: RequestWithUser) {
     return this.aiService.getConversations(req.user.id);
@@ -38,5 +66,10 @@ export class AiController {
   @Get('conversations/:id/messages')
   getMessages(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.aiService.getMessages(id, req.user.id);
+  }
+
+  @Get('models')
+  getModels() {
+    return this.aiService.getModels();
   }
 }

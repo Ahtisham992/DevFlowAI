@@ -48,7 +48,10 @@ export class AiService {
       orderBy: { createdAt: 'asc' },
     });
 
-    const messages = history.map((m) => ({ role: m.role, content: m.content }));
+    // Context trimming: Keep only the last 10 messages to prevent token overflow
+    const recentHistory = history.slice(-10);
+
+    const messages = recentHistory.map((m) => ({ role: m.role, content: m.content }));
     messages.unshift({
       role: 'system',
       content:
@@ -132,5 +135,134 @@ export class AiService {
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
     });
+  }
+  async analyzeCode(code: string, model = 'llama3') {
+    const prompt = `
+You are an expert code reviewer. Analyze the following code.
+Return ONLY valid JSON with this exact structure:
+{
+  "summary": "A brief summary of what the code does",
+  "issues": [
+    { "type": "bug", "description": "...", "line": 10 }
+  ],
+  "suggestions": ["..."],
+  "complexity": "O(n)"
+}
+The 'type' for issues can be 'bug', 'security', 'performance', or 'style'.
+If there are no issues, return an empty array for issues.
+Do not wrap the JSON in Markdown backticks. Just output raw JSON.
+
+Code to analyze:
+${code}
+`;
+
+    try {
+      const res = await fetch('http://127.0.0.1:11434/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          prompt,
+          format: 'json',
+          stream: false,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Ollama request failed');
+      const data = await res.json();
+      return JSON.parse(data.response);
+    } catch (error) {
+      console.error('Code analysis failed:', error);
+      throw new Error('Failed to analyze code');
+    }
+  }
+
+  async debugCode(code: string, errorMessage: string, model = 'llama3') {
+    const prompt = `
+You are an expert software engineer and debugger.
+Analyze the following code and the associated error message.
+Return ONLY valid JSON with this exact structure:
+{
+  "rootCause": "Explanation of why the error occurs",
+  "solution": "High level description of how to fix it",
+  "fixedCode": "The corrected code snippet"
+}
+Do not wrap the JSON in Markdown backticks. Just output raw JSON.
+
+Code:
+${code}
+
+Error Message:
+${errorMessage}
+`;
+
+    try {
+      const res = await fetch('http://127.0.0.1:11434/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, prompt, format: 'json', stream: false }),
+      });
+      if (!res.ok) throw new Error('Ollama request failed');
+      const data = await res.json();
+      return JSON.parse(data.response);
+    } catch (error) {
+      console.error('Code debugging failed:', error);
+      throw new Error('Failed to debug code');
+    }
+  }
+
+  async generateDocs(code: string, model = 'llama3') {
+    const prompt = `
+You are a technical writer and senior developer.
+Generate comprehensive markdown documentation for the following code.
+Include:
+- A high-level overview
+- Parameters, arguments, and return types (if applicable)
+- Examples of how to use it
+Output ONLY the markdown documentation. Do not wrap in JSON.
+
+Code:
+${code}
+`;
+
+    try {
+      const res = await fetch('http://127.0.0.1:11434/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, prompt, stream: false }),
+      });
+      if (!res.ok) throw new Error('Ollama request failed');
+      const data = await res.json();
+      return { documentation: data.response };
+    } catch (error) {
+      console.error('Docs generation failed:', error);
+      throw new Error('Failed to generate documentation');
+    }
+  }
+
+  async generateEmbeddings(text: string, model = 'nomic-embed-text') {
+    try {
+      const res = await fetch('http://127.0.0.1:11434/api/embeddings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, prompt: text }),
+      });
+      if (!res.ok) throw new Error('Ollama embeddings request failed');
+      const data = await res.json();
+      return { embedding: data.embedding };
+    } catch (error) {
+      console.error('Embeddings generation failed:', error);
+      throw new Error('Failed to generate embeddings');
+    }
+  }
+
+  async getModels() {
+    try {
+      const res = await fetch('http://127.0.0.1:11434/api/tags');
+      const data = await res.json();
+      return data.models || [];
+    } catch {
+      return [{ name: 'llama3:latest' }];
+    }
   }
 }
