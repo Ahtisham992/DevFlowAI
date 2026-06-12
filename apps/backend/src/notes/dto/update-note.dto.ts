@@ -10,6 +10,7 @@ export class UpdateNoteDto {
   content?: string;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   tags?: string[];
 

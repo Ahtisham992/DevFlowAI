@@ -26,12 +26,14 @@ export default function ProjectDetailPage() {
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = useState('Overview');
 
-    const { data: project, isLoading } = useQuery({
+    const { data: project, isLoading, error } = useQuery({
         queryKey: ['project', id],
         queryFn: async () => {
+            if (!id || id === 'undefined') return null;
             const { data } = await api.get<Project>(`/projects/${id}`);
             return data;
         },
+        enabled: !!id && id !== 'undefined',
     });
 
     if (isLoading) {
@@ -44,7 +46,11 @@ export default function ProjectDetailPage() {
         );
     }
 
-    if (!project) return <div>Project not found</div>;
+    if (error) {
+        return <div className="p-12 text-center text-red-500">Error loading project. It may have been deleted or you don't have access.</div>;
+    }
+
+    if (!project) return <div className="p-12 text-center">Project not found</div>;
 
     return (
         <div className="space-y-6">
