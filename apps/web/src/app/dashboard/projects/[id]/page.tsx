@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { FolderGit2, FileText, Bot, GitBranch } from 'lucide-react';
+import { FolderGit2, FileText, Bot, GitBranch, Activity } from 'lucide-react';
 import api from '@/lib/axios';
 import { cn } from '@/lib/utils';
 
@@ -26,12 +26,14 @@ export default function ProjectDetailPage() {
     const { id } = useParams<{ id: string }>();
     const [activeTab, setActiveTab] = useState('Overview');
 
-    const { data: project, isLoading } = useQuery({
+    const { data: project, isLoading, error } = useQuery({
         queryKey: ['project', id],
         queryFn: async () => {
+            if (!id || id === 'undefined') return null;
             const { data } = await api.get<Project>(`/projects/${id}`);
             return data;
         },
+        enabled: !!id && id !== 'undefined',
     });
 
     if (isLoading) {
@@ -44,7 +46,11 @@ export default function ProjectDetailPage() {
         );
     }
 
-    if (!project) return <div>Project not found</div>;
+    if (error) {
+        return <div className="p-12 text-center text-red-500">Error loading project. It may have been deleted or you don't have access.</div>;
+    }
+
+    if (!project) return <div className="p-12 text-center">Project not found</div>;
 
     return (
         <div className="space-y-6">
@@ -102,16 +108,23 @@ export default function ProjectDetailPage() {
         activeTab === 'Overview' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                    { label: 'Notes', value: project.notes.length, icon: '📝' },
-                    { label: 'Status', value: project.status, icon: '🔄' },
-                    { label: 'GitHub', value: project.githubUrl ? 'Connected' : 'Not connected', icon: '🐙' },
-                ].map((stat) => (
-                    <div key={stat.label} className="border rounded-xl p-4 space-y-1">
-                        <div className="text-2xl">{stat.icon}</div>
-                        <div className="font-bold capitalize">{stat.value}</div>
-                        <div className="text-sm text-muted-foreground">{stat.label}</div>
-                    </div>
-                ))}
+                    { label: 'Notes', value: project.notes.length, icon: FileText },
+                    { label: 'Status', value: project.status, icon: Activity },
+                    { label: 'GitHub', value: project.githubUrl ? 'Connected' : 'Not connected', icon: GitBranch },
+                ].map((stat) => {
+                    const Icon = stat.icon;
+                    return (
+                        <div key={stat.label} className="border rounded-xl p-4 space-y-2">
+                            <div className="text-primary bg-primary/10 w-fit p-2 rounded-lg">
+                                <Icon className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="font-bold capitalize">{stat.value}</div>
+                                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         )
     }

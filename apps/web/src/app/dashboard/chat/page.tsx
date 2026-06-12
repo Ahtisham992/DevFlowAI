@@ -36,6 +36,7 @@ export default function ChatPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
+    const [selectedModel, setSelectedModel] = useState('llama3');
     
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -45,6 +46,15 @@ export default function ChatPage() {
         queryKey: ['conversations'],
         queryFn: async () => {
             const { data } = await api.get<Conversation[]>('/ai/conversations');
+            return data;
+        },
+    });
+
+    // Fetch models list
+    const { data: models = [] } = useQuery({
+        queryKey: ['models'],
+        queryFn: async () => {
+            const { data } = await api.get<{ name: string }[]>('/ai/models');
             return data;
         },
     });
@@ -84,7 +94,7 @@ export default function ChatPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ message: currentInput, conversationId }),
+                body: JSON.stringify({ message: currentInput, conversationId, model: selectedModel }),
                 signal: abortControllerRef.current.signal,
             });
 
@@ -166,6 +176,21 @@ export default function ChatPage() {
                         <PlusCircle className="w-4 h-4" />
                         New Chat
                     </button>
+                    
+                    <div className="mt-4">
+                        <label className="text-xs text-muted-foreground font-medium mb-1.5 block">Model</label>
+                        <select
+                            value={selectedModel}
+                            onChange={(e) => setSelectedModel(e.target.value)}
+                            disabled={!!conversationId}
+                            className="w-full text-sm bg-background border rounded-md px-3 py-1.5 outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                        >
+                            {models.map((m) => (
+                                <option key={m.name} value={m.name}>{m.name}</option>
+                            ))}
+                            {models.length === 0 && <option value="llama3">llama3 (Default)</option>}
+                        </select>
+                    </div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
                     {isLoadingConversations ? (

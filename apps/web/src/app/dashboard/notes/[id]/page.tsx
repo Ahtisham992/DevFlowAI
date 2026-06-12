@@ -20,6 +20,7 @@ interface Note {
     title: string;
     content?: string;
     tags: string[];
+    projectId?: string;
     updatedAt: string;
 }
 
@@ -40,6 +41,7 @@ export default function NoteDetailPage() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [tags, setTags] = useState<string[]>([]);
+    const [projectId, setProjectId] = useState<string>('');
     const [tagInput, setTagInput] = useState('');
     const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'idle'>('idle');
 
@@ -61,19 +63,29 @@ export default function NoteDetailPage() {
         },
     });
 
+    // Fetch projects
+    const { data: projects = [] } = useQuery({
+        queryKey: ['projects'],
+        queryFn: async () => {
+            const { data } = await api.get<{ id: string; name: string }[]>('/projects');
+            return data;
+        },
+    });
+
     // Populate initial state
     useEffect(() => {
         if (note && saveStatus === 'idle') {
             setTitle(note.title || '');
             setContent(note.content || '');
             setTags(note.tags || []);
+            setProjectId(note.projectId || '');
             setSaveStatus('saved');
         }
     }, [note]);
 
     // Mutation to save note
     const saveMutation = useMutation({
-        mutationFn: async (payload: { title: string; content: string; tags: string[] }) => {
+        mutationFn: async (payload: { title: string; content: string; tags: string[]; projectId?: string }) => {
             await api.patch(`/notes/${id}`, payload);
         },
         onSuccess: () => {
@@ -92,18 +104,18 @@ export default function NoteDetailPage() {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                saveMutation.mutate({ title, content, tags });
+                saveMutation.mutate({ title, content, tags, projectId: projectId || undefined });
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [title, content, tags, saveMutation]);
+    }, [title, content, tags, projectId, saveMutation]);
 
     // Debounced save
     const debouncedSave = useMemo(
         () =>
-            debounce((newTitle: string, newContent: string, newTags: string[]) => {
-                saveMutation.mutate({ title: newTitle, content: newContent, tags: newTags });
+            debounce((newTitle: string, newContent: string, newTags: string[], newProjectId: string) => {
+                saveMutation.mutate({ title: newTitle, content: newContent, tags: newTags, projectId: newProjectId || undefined });
             }, 1000),
         [saveMutation]
     );
@@ -113,14 +125,14 @@ export default function NoteDetailPage() {
         const newTitle = e.target.value;
         setTitle(newTitle);
         setSaveStatus('saving');
-        debouncedSave(newTitle, content, tags);
+        debouncedSave(newTitle, content, tags, projectId);
     };
 
     const handleContentChange = (val?: string) => {
         const newContent = val || '';
         setContent(newContent);
         setSaveStatus('saving');
-        debouncedSave(title, newContent, tags);
+        debouncedSave(title, newContent, tags, projectId);
     };
 
     const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -131,7 +143,7 @@ export default function NoteDetailPage() {
                 const newTags = [...tags, newTag];
                 setTags(newTags);
                 setSaveStatus('saving');
-                debouncedSave(title, content, newTags);
+                debouncedSave(title, content, newTags, projectId);
             }
             setTagInput('');
         }
@@ -141,14 +153,21 @@ export default function NoteDetailPage() {
         const newTags = tags.filter((t) => t !== tagToRemove);
         setTags(newTags);
         setSaveStatus('saving');
-        debouncedSave(title, content, newTags);
+        debouncedSave(title, content, newTags, projectId);
+    };
+
+    const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newProjectId = e.target.value;
+        setProjectId(newProjectId);
+        setSaveStatus('saving');
+        debouncedSave(title, content, tags, newProjectId);
     };
 
     const handleRestoreVersion = (version: NoteVersion) => {
         setTitle(version.title);
         setContent(version.content || '');
         setSaveStatus('saving');
-        debouncedSave(version.title, version.content || '', tags);
+        debouncedSave(version.title, version.content || '', tags, projectId);
     };
 
     if (isLoading) {
@@ -196,6 +215,19 @@ export default function NoteDetailPage() {
                             <span className="text-red-500">Failed to save</span>
                         )}
                     </div>
+                </div>
+
+                <div className="flex items-center gap-4 ml-12">
+                    <select
+                        value={projectId}
+                        onChange={handleProjectChange}
+                        className="text-sm bg-muted border-none rounded-lg px-3 py-1.5 focus:ring-0 outline-none w-48 text-muted-foreground"
+                    >
+                        <option value="">No Project</option>
+                        {projects.map((p) => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Tags */}
