@@ -7,6 +7,8 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { GithubService } from './github.service';
 import { ConnectRepoDto } from './dto/connect-repo.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
@@ -18,6 +20,7 @@ export class GithubController {
   constructor(
     private readonly githubService: GithubService,
     private readonly prisma: PrismaService,
+    @InjectQueue('repo-indexer') private readonly indexerQueue: Queue,
   ) {}
 
   @Post('connect')
@@ -51,8 +54,15 @@ export class GithubController {
       data: { githubUrl: repoUrl },
     });
 
+    // Queue the repository for background indexing
+    await this.indexerQueue.add('index-repo', {
+      projectId,
+      repoUrl,
+      branch: metadata.defaultBranch,
+    });
+
     return {
-      message: 'Repository successfully connected',
+      message: 'Repository successfully connected and queued for indexing',
       metadata,
     };
   }

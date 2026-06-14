@@ -42,6 +42,7 @@ model Project {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   notes       Note[]
+  repoEmbeddings RepoEmbedding[]
 }
 
 model Note {
@@ -97,4 +98,13 @@ model Message {
   createdAt      DateTime     @default(now())
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model RepoEmbedding {
+  id        String                 @id @default(uuid())
+  filePath  String
+  content   String
+  embedding Unsupported("vector(768)")?
+  projectId String
+  project   Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

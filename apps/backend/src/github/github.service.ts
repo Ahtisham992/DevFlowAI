@@ -89,4 +89,66 @@ export class GithubService {
       throw new BadRequestException('Failed to connect to GitHub API');
     }
   }
+
+  /**
+   * Fetch the recursive file tree of a repository.
+   */
+  async fetchRepoTree(repoUrl: string, branch: string): Promise<any[]> {
+    const { owner, repo } = this.parseRepoUrl(repoUrl);
+
+    try {
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`,
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'DevFlowAI',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new BadRequestException('Failed to fetch repository tree');
+      }
+
+      const data = (await response.json()) as { tree: any[] };
+      return data.tree;
+    } catch {
+      throw new BadRequestException('Failed to fetch repository tree');
+    }
+  }
+
+  /**
+   * Fetch the raw content of a file from a repository.
+   */
+  async fetchFileContent(
+    repoUrl: string,
+    filePath: string,
+    branch: string,
+  ): Promise<string> {
+    const { owner, repo } = this.parseRepoUrl(repoUrl);
+
+    try {
+      const response = await fetch(
+        `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`,
+        {
+          headers: {
+            'User-Agent': 'DevFlowAI',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new BadRequestException(
+          `Failed to fetch file content for ${filePath}`,
+        );
+      }
+
+      return await response.text();
+    } catch {
+      throw new BadRequestException(
+        `Failed to fetch file content for ${filePath}`,
+      );
+    }
+  }
 }
