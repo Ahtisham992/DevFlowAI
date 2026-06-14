@@ -3791,13 +3791,13 @@ MIT
 
 | Day | Focus | Tasks |
 |-----|-------|-------|
-| 71 | Flutter auth | Login + register screens |
-| 72 | Flutter navigation | GoRouter setup, bottom nav |
-| 73 | Flutter workspaces | List screen |
-| 74 | Flutter projects | List + detail screen |
-| 75 | Flutter notes | Notes list + simple editor |
-| 76 | Flutter AI chat | Chat screen, SSE streaming |
-| 77 | Flutter polish | Loading states, error handling |
+| 71 | React Native auth | Login + register screens |
+| 72 | React Native navigation | React Navigation setup, bottom nav |
+| 73 | React Native workspaces | List screen |
+| 74 | React Native projects | List + detail screen |
+| 75 | React Native notes | Notes list + simple editor |
+| 76 | React Native AI chat | Chat screen, SSE streaming |
+| 77 | React Native polish | Loading states, error handling |
 | 78 | Web performance | Skeletons, lazy loading, Lighthouse audit |
 | 79 | E2E tests | Playwright tests for core flows |
 | 80 | Final buffer | Bug fixes, documentation, README |
