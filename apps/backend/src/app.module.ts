@@ -10,6 +10,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { NotesModule } from './notes/notes.module';
 
 import { AiModule } from './ai/ai.module';
+import { GithubModule } from './github/github.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AiModule } from './ai/ai.module';
     ProjectsModule,
     NotesModule,
     AiModule,
+    GithubModule,
   ],
   controllers: [AppController],
   providers: [AppService],

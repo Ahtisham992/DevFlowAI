@@ -29,7 +29,7 @@ export class NotesService {
 
   private async indexNote(noteId: string, content: string | null) {
     if (!content) return;
-    
+
     // Delete old embeddings
     await this.prisma.noteEmbedding.deleteMany({ where: { noteId } });
 
