@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { NotificationBell } from './NotificationBell';
 
 const pageTitles: Record<string, string> = {
     '/dashboard': 'Dashboard',
@@ -24,6 +25,7 @@ export default function Header() {
         <header className="h-14 border-b flex items-center justify-between px-6">
             <h2 className="font-semibold text-lg">{title}</h2>
             <div className="flex items-center gap-3">
+                <NotificationBell />
                 <span className="text-sm text-muted-foreground hidden md:block">
                     {user?.email}
                 </span>

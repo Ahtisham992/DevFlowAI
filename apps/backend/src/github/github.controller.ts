@@ -62,6 +62,7 @@ export class GithubController {
       projectId,
       repoUrl,
       branch: metadata.defaultBranch,
+      userId,
     });
 
     return {
@@ -71,7 +72,10 @@ export class GithubController {
   }
 
   @Get('repo/:projectId')
-  async getRepoDetails(@Request() req: { user: { id: string } }, @Param('projectId') projectId: string) {
+  async getRepoDetails(
+    @Request() req: { user: { id: string } },
+    @Param('projectId') projectId: string,
+  ) {
     const userId = req.user.id;
 
     const project = await this.prisma.project.findUnique({
@@ -88,11 +92,18 @@ export class GithubController {
     }
 
     if (!project.githubUrl) {
-      throw new BadRequestException('Project does not have a connected GitHub repository');
+      throw new BadRequestException(
+        'Project does not have a connected GitHub repository',
+      );
     }
 
-    const metadata = await this.githubService.fetchRepoMetadata(project.githubUrl);
-    const tree = await this.githubService.fetchRepoTree(project.githubUrl, metadata.defaultBranch);
+    const metadata = await this.githubService.fetchRepoMetadata(
+      project.githubUrl,
+    );
+    const tree = await this.githubService.fetchRepoTree(
+      project.githubUrl,
+      metadata.defaultBranch,
+    );
 
     return { metadata, tree };
   }

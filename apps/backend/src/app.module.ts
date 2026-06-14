@@ -12,6 +12,7 @@ import { NotesModule } from './notes/notes.module';
 
 import { AiModule } from './ai/ai.module';
 import { GithubModule } from './github/github.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { GithubModule } from './github/github.module';
     NotesModule,
     AiModule,
     GithubModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

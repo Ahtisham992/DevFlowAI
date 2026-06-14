@@ -3,6 +3,8 @@ import { Job } from 'bullmq';
 import { GithubService } from './github.service';
 import { AiService } from '../ai/ai.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 
 interface GithubTreeNode {
   path: string;
@@ -15,6 +17,8 @@ export class GithubIndexerProcessor extends WorkerHost {
     private readonly githubService: GithubService,
     private readonly aiService: AiService,
     private readonly prisma: PrismaService,
+    private readonly notificationsGateway: NotificationsGateway,
+    private readonly notificationsService: NotificationsService,
   ) {
     super();
   }
@@ -31,13 +35,25 @@ export class GithubIndexerProcessor extends WorkerHost {
   }
 
   async process(
-    job: Job<{ projectId: string; repoUrl: string; branch: string }>,
+    job: Job<{
+      projectId: string;
+      repoUrl: string;
+      branch: string;
+      userId: string;
+    }>,
   ): Promise<any> {
-    const { projectId, repoUrl, branch } = job.data;
+    const { projectId, repoUrl, branch, userId } = job.data;
 
     console.log(
       `[repo-indexer] Starting indexing for ${repoUrl} (Project ${projectId})`,
     );
+
+    this.notificationsGateway.sendToUser(userId, 'repo.indexing.progress', {
+      projectId,
+      status: 'fetching',
+      message: 'Fetching repository file tree...',
+      progress: 0,
+    });
 
     try {
       // 1. Fetch file tree
@@ -66,6 +82,9 @@ export class GithubIndexerProcessor extends WorkerHost {
       console.log(`[repo-indexer] Found ${files.length} indexable files`);
 
       // 2. Fetch content and embed
+      let processedFiles = 0;
+      const totalFiles = files.length;
+
       for (const file of files) {
         try {
           const content = await this.githubService.fetchFileContent(
@@ -73,7 +92,10 @@ export class GithubIndexerProcessor extends WorkerHost {
             file.path,
             branch,
           );
-          if (!content.trim()) continue;
+          if (!content.trim()) {
+            processedFiles++;
+            continue;
+          }
 
           // Clear existing embeddings for this file in this project to prevent duplicates
           await this.prisma.repoEmbedding.deleteMany({
@@ -106,15 +128,56 @@ export class GithubIndexerProcessor extends WorkerHost {
             fileError,
           );
         }
+
+        processedFiles++;
+        // Emit progress every file (or batch in a real app)
+        this.notificationsGateway.sendToUser(userId, 'repo.indexing.progress', {
+          projectId,
+          status: 'indexing',
+          message: `Indexed ${processedFiles} of ${totalFiles} files`,
+          progress: Math.round((processedFiles / totalFiles) * 100),
+        });
       }
 
       console.log(`[repo-indexer] Completed indexing for ${repoUrl}`);
+
+      // Emit completion notification
+      this.notificationsGateway.sendToUser(userId, 'repo.indexing.progress', {
+        projectId,
+        status: 'completed',
+        message: 'Indexing completed successfully!',
+        progress: 100,
+      });
+
+      // Persist notification in DB
+      await this.notificationsService.create(
+        userId,
+        'Repository Indexed',
+        `Successfully indexed ${repoUrl}`,
+        'success',
+      );
+
       return { success: true, indexedFiles: files.length };
     } catch (error) {
       console.error(
         `[repo-indexer] Failed to process repository ${repoUrl}:`,
         error,
       );
+
+      this.notificationsGateway.sendToUser(userId, 'repo.indexing.progress', {
+        projectId,
+        status: 'error',
+        message: 'Indexing failed.',
+        progress: 0,
+      });
+
+      await this.notificationsService.create(
+        userId,
+        'Indexing Failed',
+        `Failed to index ${repoUrl}`,
+        'error',
+      );
+
       throw error;
     }
   }
