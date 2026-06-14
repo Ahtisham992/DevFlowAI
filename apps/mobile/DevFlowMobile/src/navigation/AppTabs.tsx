@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import WorkspacesScreen from '../screens/app/WorkspacesScreen';
-// import ProjectsScreen from '../screens/app/ProjectsScreen';
+import WorkspacesStack from './WorkspacesStack';
+import { Briefcase } from 'lucide-react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,14 +15,11 @@ export default function AppTabs() {
     >
       <Tab.Screen 
         name="Workspaces" 
-        component={WorkspacesScreen} 
+        component={WorkspacesStack} 
+        options={{
+          tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size} />
+        }}
       />
-      {/* 
-      <Tab.Screen 
-        name="Projects" 
-        component={ProjectsScreen} 
-      /> 
-      */}
     </Tab.Navigator>
   );
 }

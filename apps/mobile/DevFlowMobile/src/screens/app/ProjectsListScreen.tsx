@@ -1,24 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { useAuthStore } from '../../store/auth.store';
-import { useWorkspaces, Workspace } from '../../hooks/useWorkspaces';
-import { Briefcase, ChevronRight, Plus } from 'lucide-react-native';
+import { useProjects, Project } from '../../hooks/useProjects';
+import { FolderGit2, ChevronRight, ArrowLeft } from 'lucide-react-native';
 
-export default function WorkspacesScreen({ navigation }: any) {
-  const { user, logout } = useAuthStore();
-  const { data: workspaces, isLoading, isError, refetch } = useWorkspaces();
+export default function ProjectsListScreen({ route, navigation }: any) {
+  const { workspaceId, workspaceName } = route.params;
+  const { data: projects, isLoading, isError, refetch } = useProjects(workspaceId);
 
-  const renderItem = ({ item }: { item: Workspace }) => (
+  const renderItem = ({ item }: { item: Project }) => (
     <TouchableOpacity 
       style={styles.card}
-      onPress={() => navigation.navigate('ProjectsList', { workspaceId: item.id, workspaceName: item.name })}
+      onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id, projectName: item.name })}
     >
       <View style={styles.cardIcon}>
-        <Briefcase color="#111" size={24} />
+        <FolderGit2 color="#111" size={24} />
       </View>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardSubtitle}>{item.role}</Text>
+        <Text style={styles.cardSubtitle}>{item.framework}</Text>
       </View>
       <ChevronRight color="#ccc" size={24} />
     </TouchableOpacity>
@@ -27,13 +26,13 @@ export default function WorkspacesScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Workspaces</Text>
-          <Text style={styles.subtitle}>Welcome back, {user?.name || user?.email?.split('@')[0]}</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Log Out</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <ArrowLeft color="#111" size={24} />
         </TouchableOpacity>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.title}>{workspaceName}</Text>
+          <Text style={styles.subtitle}>Projects</Text>
+        </View>
       </View>
 
       <View style={styles.listContainer}>
@@ -43,20 +42,20 @@ export default function WorkspacesScreen({ navigation }: any) {
           </View>
         ) : isError ? (
           <View style={styles.center}>
-            <Text style={styles.errorText}>Failed to load workspaces.</Text>
+            <Text style={styles.errorText}>Failed to load projects.</Text>
             <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
               <Text style={styles.retryText}>Retry</Text>
             </TouchableOpacity>
           </View>
-        ) : workspaces?.length === 0 ? (
+        ) : projects?.length === 0 ? (
           <View style={styles.center}>
-            <Briefcase color="#ccc" size={48} style={{ marginBottom: 16 }} />
-            <Text style={styles.emptyTitle}>No workspaces yet</Text>
-            <Text style={styles.emptySubtitle}>Create one on the web dashboard to get started.</Text>
+            <FolderGit2 color="#ccc" size={48} style={{ marginBottom: 16 }} />
+            <Text style={styles.emptyTitle}>No projects yet</Text>
+            <Text style={styles.emptySubtitle}>Add a project from the web app.</Text>
           </View>
         ) : (
           <FlatList
-            data={workspaces}
+            data={projects}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
@@ -78,31 +77,25 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     backgroundColor: '#fff',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
+  backButton: {
+    marginRight: 16,
+    padding: 4,
+  },
+  headerTextContainer: {
+    flex: 1,
+  },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#111',
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
-    marginTop: 4,
-  },
-  logoutButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 6,
-  },
-  logoutText: {
-    color: '#333',
-    fontSize: 12,
-    fontWeight: 'bold',
   },
   listContainer: {
     flex: 1,
@@ -127,7 +120,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f4ff',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -144,6 +137,7 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 14,
     color: '#888',
+    textTransform: 'capitalize',
   },
   center: {
     flex: 1,
