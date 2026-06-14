@@ -1,22 +1,66 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useAuthStore } from '../../store/auth.store';
+import { useWorkspaces, Workspace } from '../../hooks/useWorkspaces';
+import { Briefcase, ChevronRight, Plus } from 'lucide-react-native';
 
 export default function WorkspacesScreen() {
   const { user, logout } = useAuthStore();
+  const { data: workspaces, isLoading, isError, refetch } = useWorkspaces();
+
+  const renderItem = ({ item }: { item: Workspace }) => (
+    <TouchableOpacity style={styles.card}>
+      <View style={styles.cardIcon}>
+        <Briefcase color="#111" size={24} />
+      </View>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{item.name}</Text>
+        <Text style={styles.cardSubtitle}>{item.role}</Text>
+      </View>
+      <ChevronRight color="#ccc" size={24} />
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Workspaces</Text>
-      <Text style={styles.subtitle}>Welcome back, {user?.name || user?.email}</Text>
-
-      <View style={styles.content}>
-        <Text style={styles.placeholderText}>Your workspaces will appear here.</Text>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Workspaces</Text>
+          <Text style={styles.subtitle}>Welcome back, {user?.name || user?.email?.split('@')[0]}</Text>
+        </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <Text style={styles.logoutText}>Log Out</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={logout}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
+      <View style={styles.listContainer}>
+        {isLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color="#000" />
+          </View>
+        ) : isError ? (
+          <View style={styles.center}>
+            <Text style={styles.errorText}>Failed to load workspaces.</Text>
+            <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
+              <Text style={styles.retryText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : workspaces?.length === 0 ? (
+          <View style={styles.center}>
+            <Briefcase color="#ccc" size={48} style={{ marginBottom: 16 }} />
+            <Text style={styles.emptyTitle}>No workspaces yet</Text>
+            <Text style={styles.emptySubtitle}>Create one on the web dashboard to get started.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={workspaces}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -24,8 +68,17 @@ export default function WorkspacesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fafafa',
+  },
+  header: {
     padding: 24,
-    backgroundColor: '#f5f5f5',
+    paddingTop: 60,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   title: {
     fontSize: 28,
@@ -33,30 +86,92 @@ const styles = StyleSheet.create({
     color: '#111',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     marginTop: 4,
-    marginBottom: 24,
   },
-  content: {
+  logoutButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 6,
+  },
+  logoutText: {
+    color: '#333',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  listContainer: {
+    flex: 1,
+  },
+  list: {
+    padding: 24,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111',
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#888',
+  },
+  center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
   },
-  placeholderText: {
-    color: '#888',
+  errorText: {
+    color: '#ff4444',
     fontSize: 16,
+    marginBottom: 16,
   },
-  button: {
-    backgroundColor: '#ff4444',
-    padding: 16,
+  retryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#111',
     borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 'auto',
   },
-  buttonText: {
+  retryText: {
     color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });
