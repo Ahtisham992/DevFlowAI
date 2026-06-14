@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FolderGit2, FileText, Bot, GitBranch, Activity } from 'lucide-react';
 import api from '@/lib/axios';
 import { cn } from '@/lib/utils';
+import { GithubRepoView } from '@/components/projects/GithubRepoView';
 
 interface Project {
     id: string;
@@ -19,6 +20,7 @@ interface Project {
 const tabs = [
     { label: 'Overview', icon: FolderGit2 },
     { label: 'Notes', icon: FileText },
+    { label: 'Code', icon: GitBranch },
     { label: 'AI Chat', icon: Bot },
 ];
 
@@ -78,89 +80,87 @@ export default function ProjectDetailPage() {
                             {project.githubUrl}
                         </a>
                     )}
+                </div>
             </div>
-        </div>
 
-      {/* Tabs */ }
-    <div className="border-b flex gap-1">
-        {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-                <button
-                    key={tab.label}
-                    onClick={() => setActiveTab(tab.label)}
-                    className={cn(
-                        'flex items-center gap-2 px-4 py-2 text-sm border-b-2 transition -mb-px',
-                        activeTab === tab.label
-                            ? 'border-primary text-primary font-medium'
-                            : 'border-transparent text-muted-foreground hover:text-foreground',
-                    )}
-                >
-                    <Icon className="w-4 h-4" />
-                    {tab.label}
-                </button>
-            );
-        })}
-    </div>
-
-    {/* Tab Content */ }
-    {
-        activeTab === 'Overview' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                    { label: 'Notes', value: project.notes.length, icon: FileText },
-                    { label: 'Status', value: project.status, icon: Activity },
-                    { label: 'GitHub', value: project.githubUrl ? 'Connected' : 'Not connected', icon: GitBranch },
-                ].map((stat) => {
-                    const Icon = stat.icon;
+            {/* Tabs */}
+            <div className="border-b flex gap-1 overflow-x-auto">
+                {tabs.map((tab) => {
+                    const Icon = tab.icon;
                     return (
-                        <div key={stat.label} className="border rounded-xl p-4 space-y-2">
-                            <div className="text-primary bg-primary/10 w-fit p-2 rounded-lg">
-                                <Icon className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <div className="font-bold capitalize">{stat.value}</div>
-                                <div className="text-sm text-muted-foreground">{stat.label}</div>
-                            </div>
-                        </div>
+                        <button
+                            key={tab.label}
+                            onClick={() => setActiveTab(tab.label)}
+                            className={cn(
+                                'flex items-center gap-2 px-4 py-2 text-sm border-b-2 transition -mb-px whitespace-nowrap',
+                                activeTab === tab.label
+                                    ? 'border-primary text-primary font-medium'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                            )}
+                        >
+                            <Icon className="w-4 h-4" />
+                            {tab.label}
+                        </button>
                     );
                 })}
             </div>
-        )
-    }
 
-    {
-        activeTab === 'Notes' && (
-            <div className="space-y-3">
-                {project.notes.length === 0 ? (
-                    <div className="border rounded-xl p-12 text-center text-muted-foreground">
-                        <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p className="font-medium">No notes yet</p>
-                        <p className="text-sm mt-1">Notes for this project will appear here</p>
-                    </div>
-                ) : (
-                    project.notes.map((note) => (
-                        <div key={note.id} className="border rounded-xl p-4 hover:shadow-sm transition">
-                            <p className="font-medium">{note.title}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                {new Date(note.updatedAt).toLocaleDateString()}
-                            </p>
+            {/* Tab Content */}
+            {activeTab === 'Overview' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                        { label: 'Notes', value: project.notes.length, icon: FileText },
+                        { label: 'Status', value: project.status, icon: Activity },
+                        { label: 'GitHub', value: project.githubUrl ? 'Connected' : 'Not connected', icon: GitBranch },
+                    ].map((stat) => {
+                        const Icon = stat.icon;
+                        return (
+                            <div key={stat.label} className="border rounded-xl p-4 space-y-2">
+                                <div className="text-primary bg-primary/10 w-fit p-2 rounded-lg">
+                                    <Icon className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="font-bold capitalize">{stat.value}</div>
+                                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {activeTab === 'Notes' && (
+                <div className="space-y-3">
+                    {project.notes.length === 0 ? (
+                        <div className="border rounded-xl p-12 text-center text-muted-foreground">
+                            <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p className="font-medium">No notes yet</p>
+                            <p className="text-sm mt-1">Notes for this project will appear here</p>
                         </div>
-                    ))
-                )}
-            </div>
-        )
-    }
+                    ) : (
+                        project.notes.map((note) => (
+                            <div key={note.id} className="border rounded-xl p-4 hover:shadow-sm transition">
+                                <p className="font-medium">{note.title}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {new Date(note.updatedAt).toLocaleDateString()}
+                                </p>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
 
-    {
-        activeTab === 'AI Chat' && (
-            <div className="border rounded-xl p-12 text-center text-muted-foreground">
-                <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="font-medium">AI Chat coming soon</p>
-                <p className="text-sm mt-1">Chat with AI about this project in Week 4</p>
-            </div>
-        )
-    }
-    </div >
-  );
+            {activeTab === 'Code' && (
+                <GithubRepoView projectId={project.id} initialGithubUrl={project.githubUrl} />
+            )}
+
+            {activeTab === 'AI Chat' && (
+                <div className="border rounded-xl p-12 text-center text-muted-foreground">
+                    <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">AI Chat coming soon</p>
+                    <p className="text-sm mt-1">Chat with AI about this project in Week 4</p>
+                </div>
+            )}
+        </div>
+    );
 }

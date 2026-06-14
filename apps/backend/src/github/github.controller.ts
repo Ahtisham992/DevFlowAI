@@ -6,6 +6,9 @@ import {
   Request,
   ForbiddenException,
   NotFoundException,
+  Get,
+  Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -65,5 +68,32 @@ export class GithubController {
       message: 'Repository successfully connected and queued for indexing',
       metadata,
     };
+  }
+
+  @Get('repo/:projectId')
+  async getRepoDetails(@Request() req: { user: { id: string } }, @Param('projectId') projectId: string) {
+    const userId = req.user.id;
+
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: { workspace: true },
+    });
+
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    if (project.workspace.userId !== userId) {
+      throw new ForbiddenException('Access denied to this project');
+    }
+
+    if (!project.githubUrl) {
+      throw new BadRequestException('Project does not have a connected GitHub repository');
+    }
+
+    const metadata = await this.githubService.fetchRepoMetadata(project.githubUrl);
+    const tree = await this.githubService.fetchRepoTree(project.githubUrl, metadata.defaultBranch);
+
+    return { metadata, tree };
   }
 }
