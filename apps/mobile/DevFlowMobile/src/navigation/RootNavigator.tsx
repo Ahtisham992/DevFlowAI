@@ -16,7 +16,7 @@ export default function RootNavigator() {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
         <Image 
-          source={require('../../assets/logo.png')} 
+          source={require('../assets/logo.png')} 
           style={{ width: 120, height: 120, borderRadius: 24, marginBottom: 24 }} 
         />
         <ActivityIndicator size="large" color="#000" />
