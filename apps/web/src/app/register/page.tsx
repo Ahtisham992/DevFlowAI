@@ -6,8 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
+import logoImage from '../../../public/logo.png';
 
 const registerSchema = z
     .object({
@@ -41,22 +43,28 @@ export default function RegisterPage() {
         setLoading(true);
         setError('');
         try {
-            const { data: authData } = await api.post('/auth/register', {
+            await api.post('/auth/register', {
                 email: data.email,
                 password: data.password,
                 name: data.name,
             });
-            const { data: userData } = await api.get('/auth/me', {
-                headers: { Authorization: `Bearer ${authData.accessToken}` },
+            
+            // Auto login after register
+            const loginRes = await api.post('/auth/login', { 
+                email: data.email, 
+                password: data.password 
             });
-            setAuth(userData, authData.accessToken, authData.refreshToken);
-            document.cookie = `accessToken=${authData.accessToken}; path=/; max-age=900`;
+            const loginData = loginRes.data;
+
+            const userRes = await api.get('/auth/me', {
+                headers: { Authorization: `Bearer ${loginData.accessToken}` },
+            });
+
+            setAuth(userRes.data, loginData.accessToken, loginData.refreshToken);
+            document.cookie = `accessToken=${loginData.accessToken}; path=/; max-age=900`;
             router.push('/dashboard');
-        } catch (err: unknown) {
-            const message =
-                (err as { response?: { data?: { message?: string } } })?.response?.data
-                    ?.message ?? 'Registration failed. Please try again.';
-            setError(typeof message === 'string' ? message : 'Registration failed.');
+        } catch {
+            setError('Registration failed. Email might be in use.');
         } finally {
             setLoading(false);
         }
@@ -65,9 +73,10 @@ export default function RegisterPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="w-full max-w-md p-8 space-y-6 border rounded-xl shadow-sm">
-                <div className="space-y-2 text-center">
-                    <h1 className="text-3xl font-bold">DevFlow AI</h1>
-                    <p className="text-muted-foreground">Create your workspace</p>
+                <div className="space-y-2 text-center flex flex-col items-center">
+                    <Image src={logoImage} alt="DevFlow AI Logo" className="w-16 h-16 rounded mb-2" />
+                    <h1 className="text-3xl font-bold">Create an account</h1>
+                    <p className="text-muted-foreground">Enter your details to get started</p>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

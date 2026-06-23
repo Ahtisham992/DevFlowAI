@@ -8,7 +8,7 @@ import { FolderGit2, FileText, Bot } from 'lucide-react-native';
 
 export default function DashboardScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
-  
+
   const { data: workspaces, isLoading: loadingW } = useWorkspaces();
   const { data: notes, isLoading: loadingN } = useNotes();
   const { data: chats, isLoading: loadingC } = useConversations();
@@ -29,9 +29,9 @@ export default function DashboardScreen({ navigation }: any) {
             <Text style={styles.title}>Welcome back,</Text>
             <Text style={styles.titleName}>{user?.name || 'Developer'}</Text>
           </View>
-          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+          {/* <TouchableOpacity onPress={logout} style={styles.logoutButton}>
             <Text style={styles.logoutText}>Log Out</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <Text style={styles.subtitle}>Your AI-powered developer workspace</Text>
       </View>
@@ -46,8 +46,8 @@ export default function DashboardScreen({ navigation }: any) {
             {stats.map((stat, idx) => {
               const Icon = stat.icon;
               return (
-                <TouchableOpacity 
-                  key={idx} 
+                <TouchableOpacity
+                  key={idx}
                   style={styles.card}
                   onPress={() => navigation.navigate(stat.route)}
                 >

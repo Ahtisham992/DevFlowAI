@@ -6,8 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import api from '@/lib/axios';
 import { useAuthStore } from '@/store/auth.store';
+import logoImage from '../../../public/logo.png';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -51,7 +53,8 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="w-full max-w-md p-8 space-y-6 border rounded-xl shadow-sm">
-                <div className="space-y-2 text-center">
+                <div className="space-y-2 text-center flex flex-col items-center">
+                    <Image src={logoImage} alt="DevFlow AI Logo" className="w-16 h-16 rounded mb-2" />
                     <h1 className="text-3xl font-bold">DevFlow AI</h1>
                     <p className="text-muted-foreground">Sign in to your workspace</p>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Image } from 'react-native';
 import { useAuthStore } from '../../store/auth.store';
 import api from '../../lib/axios';
 
@@ -31,6 +31,9 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image source={require('../../assets/logo.png')} style={styles.logo} />
+      </View>
       <Text style={styles.title}>DevFlow AI</Text>
       <Text style={styles.subtitle}>Welcome back</Text>
 
@@ -72,6 +75,15 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: 'center',
     backgroundColor: '#fff',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 16,
   },
   title: {
     fontSize: 32,

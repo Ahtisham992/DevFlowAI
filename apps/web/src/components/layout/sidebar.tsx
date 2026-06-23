@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import logoImage from '../../../public/logo.png';
 import ThemeToggle from '@/components/theme-toggle';
 import {
     LayoutDashboard,
@@ -48,7 +50,7 @@ export default function Sidebar() {
             {/* Logo */}
             <div className="flex items-center justify-between mb-8 px-2">
                 <div className="flex items-center gap-2">
-                    <Zap className="w-6 h-6 text-primary" />
+                    <Image src={logoImage} alt="DevFlow AI Logo" className="w-8 h-8 rounded" />
                     <span className="text-lg font-bold">DevFlow AI</span>
                 </div>
                 <ThemeToggle />
