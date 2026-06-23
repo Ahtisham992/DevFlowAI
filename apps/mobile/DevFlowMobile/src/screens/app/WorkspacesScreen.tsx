@@ -2,26 +2,42 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useAuthStore } from '../../store/auth.store';
 import { useWorkspaces, Workspace } from '../../hooks/useWorkspaces';
-import { Briefcase, ChevronRight, Plus } from 'lucide-react-native';
+import { Briefcase, FolderGit2, FileText } from 'lucide-react-native';
 
 export default function WorkspacesScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
   const { data: workspaces, isLoading, isError, refetch } = useWorkspaces();
 
   const renderItem = ({ item }: { item: Workspace }) => (
-    <TouchableOpacity 
-      style={styles.card}
-      onPress={() => navigation.navigate('ProjectsList', { workspaceId: item.id, workspaceName: item.name })}
-    >
-      <View style={styles.cardIcon}>
-        <Briefcase color="#111" size={24} />
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <View style={styles.cardIcon}>
+          <Briefcase color="#111" size={24} />
+        </View>
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{item.name}</Text>
+          <Text style={styles.cardSubtitle}>{item.role}</Text>
+        </View>
       </View>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardSubtitle}>{item.role}</Text>
+      
+      <View style={styles.cardActions}>
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('ProjectsList', { workspaceId: item.id, workspaceName: item.name })}
+        >
+          <FolderGit2 color="#444" size={18} />
+          <Text style={styles.actionText}>Projects</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('NotesList', { workspaceId: item.id, workspaceName: item.name })}
+        >
+          <FileText color="#444" size={18} />
+          <Text style={styles.actionText}>Notes</Text>
+        </TouchableOpacity>
       </View>
-      <ChevronRight color="#ccc" size={24} />
-    </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -115,13 +131,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   cardIcon: {
     width: 48,
@@ -144,6 +163,28 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 14,
     color: '#888',
+  },
+  cardActions: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 16,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f9f9f9',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  actionText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#444',
   },
   center: {
     flex: 1,
