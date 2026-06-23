@@ -40,11 +40,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const token = await AsyncStorage.getItem('token');
       const userStr = await AsyncStorage.getItem('user');
-      if (token && userStr) {
+      
+      // Safety check in case "undefined" string was stored previously
+      if (token && token !== 'undefined' && userStr && userStr !== 'undefined') {
         const user = JSON.parse(userStr);
         // We could also verify token validity with backend here
         set({ token, user, isAuthenticated: true, isLoading: false });
       } else {
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('user');
         set({ isLoading: false });
       }
     } catch (e) {

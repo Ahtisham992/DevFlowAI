@@ -10,8 +10,11 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { Put } from '@nestjs/common';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '@prisma/client';
 
@@ -50,5 +53,27 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: Omit<User, 'password'>) {
     return user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  updateProfile(
+    @CurrentUser() user: { id: string },
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.authService.updateProfile(user.id, dto.name);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('change-password')
+  changePassword(
+    @CurrentUser() user: { id: string },
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(
+      user.id,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 }

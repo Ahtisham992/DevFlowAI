@@ -17,8 +17,11 @@ export default function LoginScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { email, password });
-      await login(response.data.access_token, response.data.user);
+      const { data: authData } = await api.post('/auth/login', { email, password });
+      const { data: userData } = await api.get('/auth/me', {
+        headers: { Authorization: `Bearer ${authData.accessToken}` }
+      });
+      await login(authData.accessToken, userData);
     } catch (error: any) {
       Alert.alert('Login Failed', error.response?.data?.message || 'Invalid credentials');
     } finally {

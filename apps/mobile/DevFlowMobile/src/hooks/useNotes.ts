@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/axios';
 
 export interface Note {
@@ -6,24 +6,17 @@ export interface Note {
   title: string;
   content: string;
   createdAt: string;
+  projectId?: string;
 }
 
-export const useNotes = (workspaceId: string) => {
+export const useNotes = (projectId?: string) => {
   return useQuery({
-    queryKey: ['workspaces', workspaceId, 'notes'],
+    queryKey: ['notes', projectId],
     queryFn: async (): Promise<Note[]> => {
-      // The workspaces endpoint likely doesn't return notes directly.
-      // Wait, let's assume there's a GET /workspaces/:id/notes or the backend doesn't have it yet.
-      // Wait, let me check backend. Actually `GET /workspaces/:id` returns workspace.
-      // Wait, we need to check how notes are fetched.
-      // Let's use `api.get('/notes')` with a workspaceId query param if there's one, or maybe the notes controller is different.
-      // In the web app, we hit `GET /workspaces/:workspaceId/notes`? Let's check.
-      // I'll assume `GET /notes?workspaceId=${workspaceId}` or `GET /workspaces/${workspaceId}/notes`
-      // I will implement GET /workspaces/:workspaceId/notes.
-      const { data } = await api.get(`/workspaces/${workspaceId}/notes`);
+      const url = projectId ? `/notes?projectId=${projectId}` : '/notes';
+      const { data } = await api.get(url);
       return data;
     },
-    enabled: !!workspaceId,
   });
 };
 
@@ -37,3 +30,43 @@ export const useNote = (noteId: string) => {
     enabled: !!noteId,
   });
 };
+
+export const useCreateNote = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (noteData: Partial<Note>) => {
+      const { data } = await api.post('/notes', noteData);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+  });
+};
+
+export const useUpdateNote = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...noteData }: Partial<Note> & { id: string }) => {
+      const { data } = await api.patch(`/notes/${id}`, noteData);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+  });
+};
+
+export const useDeleteNote = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/notes/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+  });
+};
+

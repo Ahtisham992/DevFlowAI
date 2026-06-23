@@ -1,12 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { useNote } from '../../hooks/useNotes';
-import { ArrowLeft } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { useNote, useDeleteNote } from '../../hooks/useNotes';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react-native';
 import Markdown from 'react-native-markdown-display';
 
 export default function NoteDetailScreen({ route, navigation }: any) {
   const { noteId, noteTitle } = route.params;
   const { data: note, isLoading, isError, refetch } = useNote(noteId);
+  const deleteMutation = useDeleteNote();
+
+  const handleDelete = () => {
+    Alert.alert('Delete Note', `Are you sure you want to delete "${note?.title}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => {
+          deleteMutation.mutate(noteId, {
+            onSuccess: () => navigation.goBack()
+          });
+        }
+      },
+    ]);
+  };
 
   if (isLoading) {
     return (
@@ -53,6 +66,15 @@ export default function NoteDetailScreen({ route, navigation }: any) {
             Generated {new Date(note.createdAt).toLocaleDateString()}
           </Text>
         </View>
+        <TouchableOpacity 
+          style={styles.actionIconButton} 
+          onPress={() => navigation.navigate('NoteForm', { noteToEdit: note })}
+        >
+          <Pencil color="#666" size={20} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionIconButton} onPress={handleDelete}>
+          <Trash2 color="#ff4444" size={20} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -153,6 +175,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     marginTop: 2,
+  },
+  actionIconButton: {
+    padding: 8,
+    marginLeft: 8,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
   },
   content: {
     flex: 1,

@@ -7,6 +7,7 @@ import {
   Req,
   Get,
   Param,
+  Delete,
 } from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AiService } from './ai.service';
@@ -24,7 +25,13 @@ export class AiController {
   @Post('chat/stream')
   async chatStream(
     @Req() req: RequestWithUser,
-    @Body() body: { conversationId?: string; message: string; model?: string },
+    @Body()
+    body: {
+      conversationId?: string;
+      message: string;
+      model?: string;
+      projectId?: string;
+    },
     @Res() res: Response,
   ) {
     return this.aiService.streamChat(req.user.id, body, res);
@@ -57,9 +64,22 @@ export class AiController {
     return this.aiService.getConversations(req.user.id);
   }
 
+  @Get('projects/:projectId/conversation')
+  getProjectConversation(
+    @Req() req: RequestWithUser,
+    @Param('projectId') projectId: string,
+  ) {
+    return this.aiService.getProjectConversation(projectId, req.user.id);
+  }
+
   @Get('conversations/:id/messages')
   getMessages(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.aiService.getMessages(id, req.user.id);
+  }
+
+  @Delete('conversations/:id')
+  deleteConversation(@Req() req: RequestWithUser, @Param('id') id: string) {
+    return this.aiService.deleteConversation(id, req.user.id);
   }
 
   @Get('models')

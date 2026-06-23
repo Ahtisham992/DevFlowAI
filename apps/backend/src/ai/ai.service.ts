@@ -18,14 +18,37 @@ export class AiService {
 
   async streamChat(
     userId: string,
-    body: { conversationId?: string; message: string; model?: string },
+    body: {
+      conversationId?: string;
+      message: string;
+      model?: string;
+      projectId?: string;
+    },
     res: Response,
   ) {
-    const { message, model = 'llama3' } = body;
+    const { message, model = 'llama3', projectId: newProjectId } = body;
     let { conversationId } = body;
     let conversationTitle = '';
+    let projectIdToUse = newProjectId;
 
-    if (!conversationId) {
+    if (newProjectId) {
+      let projectConv = await this.prisma.conversation.findFirst({
+        where: { projectId: newProjectId, userId },
+      });
+      if (!projectConv) {
+        projectConv = await this.prisma.conversation.create({
+          data: {
+            title: `Project Chat`,
+            model,
+            userId,
+            projectId: newProjectId,
+          },
+        });
+      }
+      conversationId = projectConv.id;
+      conversationTitle = projectConv.title || 'Project Chat';
+      projectIdToUse = newProjectId;
+    } else if (!conversationId) {
       conversationTitle = message.substring(0, 40) + '...';
       const conv = await this.prisma.conversation.create({
         data: { title: conversationTitle, model, userId },
@@ -37,6 +60,7 @@ export class AiService {
       });
       if (!conv) throw new NotFoundException('Conversation not found');
       if (conv.userId !== userId) throw new ForbiddenException();
+      projectIdToUse = conv.projectId ?? undefined;
     }
 
     await this.prisma.message.create({
@@ -58,7 +82,17 @@ export class AiService {
 
     // RAG INJECTION
     let contextTexts = '';
+    let projectDescription = '';
     try {
+      if (projectIdToUse) {
+        const project = await this.prisma.project.findUnique({
+          where: { id: projectIdToUse },
+        });
+        if (project) {
+          projectDescription = `This conversation is regarding the project "${project.name}".\n${project.description ? `Project Description: ${project.description}\n` : ''}`;
+        }
+      }
+
       const { embedding } = await this.generateEmbeddings(message);
       const embeddingString = `[${embedding.join(',')}]`;
 
@@ -71,6 +105,20 @@ export class AiService {
         LIMIT 3
       `;
       contextTexts = similarChunks.map((c) => c.content).join('\n---\n');
+
+      if (projectIdToUse) {
+        const repoChunks = await this.prisma.$queryRaw<{ content: string }[]>`
+          SELECT content
+          FROM "RepoEmbedding"
+          WHERE "projectId" = ${projectIdToUse}
+          ORDER BY embedding <=> ${embeddingString}::vector
+          LIMIT 3
+        `;
+        const repoTexts = repoChunks.map((c) => c.content).join('\n---\n');
+        if (repoTexts) {
+          contextTexts += '\n\n--- GitHub Repo Context ---\n' + repoTexts;
+        }
+      }
     } catch (err) {
       console.error('Failed to fetch RAG context:', err);
     }
@@ -78,7 +126,8 @@ export class AiService {
     messages.unshift({
       role: 'system',
       content: `You are a helpful AI coding assistant named DevFlow AI.
-Here is some context from the user's notes that might be relevant to their query:
+${projectDescription}
+Here is some context from the user's notes and codebase that might be relevant to their query:
 ${contextTexts}
 
 Use this context to inform your answer if it is relevant.`,
@@ -142,9 +191,17 @@ Use this context to inform your answer if it is relevant.`,
     }
   }
 
+  async getProjectConversation(projectId: string, userId: string) {
+    const conv = await this.prisma.conversation.findFirst({
+      where: { projectId, userId },
+      select: { id: true, title: true, model: true, updatedAt: true },
+    });
+    return conv; // can be null
+  }
+
   async getConversations(userId: string) {
     return this.prisma.conversation.findMany({
-      where: { userId },
+      where: { userId, projectId: null }, // Global conversations only
       orderBy: { updatedAt: 'desc' },
       select: { id: true, title: true, model: true, updatedAt: true },
     });
@@ -160,6 +217,18 @@ Use this context to inform your answer if it is relevant.`,
     return this.prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async deleteConversation(conversationId: string, userId: string) {
+    const conv = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+    });
+    if (!conv) throw new NotFoundException('Conversation not found');
+    if (conv.userId !== userId) throw new ForbiddenException();
+
+    return this.prisma.conversation.delete({
+      where: { id: conversationId },
     });
   }
   async analyzeCode(code: string, model = 'llama3') {

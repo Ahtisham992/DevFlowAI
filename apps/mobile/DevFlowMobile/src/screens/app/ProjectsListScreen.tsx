@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useProjects, Project } from '../../hooks/useProjects';
-import { FolderGit2, ChevronRight, ArrowLeft } from 'lucide-react-native';
+import { FolderGit2, ChevronRight, ArrowLeft, Plus } from 'lucide-react-native';
 
 export default function ProjectsListScreen({ route, navigation }: any) {
   const { workspaceId, workspaceName } = route.params;
@@ -59,10 +59,18 @@ export default function ProjectsListScreen({ route, navigation }: any) {
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
+            refreshing={isLoading}
+            onRefresh={refetch}
             showsVerticalScrollIndicator={false}
           />
         )}
       </View>
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => navigation.navigate('ProjectForm', { workspaceId })}
+      >
+        <Plus color="#fff" size={24} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -170,5 +178,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    backgroundColor: '#000',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
   },
 });

@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useNotes, Note } from '../../hooks/useNotes';
-import { FileText, ChevronRight, ArrowLeft, Clock } from 'lucide-react-native';
+import { FileText, ChevronRight, ArrowLeft, Clock, Plus } from 'lucide-react-native';
 
 export default function NotesListScreen({ route, navigation }: any) {
-  const { workspaceId, workspaceName } = route.params;
-  const { data: notes, isLoading, isError, refetch } = useNotes(workspaceId);
+  const { workspaceId, workspaceName } = route?.params || {};
+  const { data: notes, isLoading, isError, refetch } = useNotes(route?.params?.projectId);
 
   const renderItem = ({ item }: { item: Note }) => (
     <TouchableOpacity 
@@ -68,6 +68,12 @@ export default function NotesListScreen({ route, navigation }: any) {
           />
         )}
       </View>
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => navigation.navigate('NoteForm', { projectId: route?.params?.projectId })}
+      >
+        <Plus color="#fff" size={24} />
+      </TouchableOpacity>
     </View>
   );
 }

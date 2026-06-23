@@ -11,6 +11,10 @@ export class CreateProjectDto {
 
   @IsString()
   @IsOptional()
+  framework?: string;
+
+  @IsString()
+  @IsOptional()
   githubUrl?: string;
 
   @IsString()

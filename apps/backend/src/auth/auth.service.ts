@@ -60,6 +60,33 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
+  async updateProfile(userId: string, name?: string) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { name },
+    });
+    // Return user without password
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async changePassword(userId: string, currentPass: string, newPass: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException('User not found');
+
+    const valid = await bcrypt.compare(currentPass, user.password);
+    if (!valid) throw new UnauthorizedException('Incorrect current password');
+
+    const hashed = await bcrypt.hash(newPass, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
+
+    return { message: 'Password updated successfully' };
+  }
+
   async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
 

@@ -14,7 +14,8 @@ import {
     FolderGit2,
     Code,
     Bug,
-    FileSignature
+    FileSignature,
+    Settings
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ const navItems = [
     { label: 'Code Analysis', href: '/dashboard/analysis', icon: Code },
     { label: 'AI Debugger', href: '/dashboard/debug', icon: Bug },
     { label: 'Docs Generator', href: '/dashboard/docs', icon: FileSignature },
+    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 export default function Sidebar() {

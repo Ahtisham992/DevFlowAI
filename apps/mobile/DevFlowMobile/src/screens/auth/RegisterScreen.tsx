@@ -18,8 +18,11 @@ export default function RegisterScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      const response = await api.post('/auth/register', { email, password, name });
-      await login(response.data.access_token, response.data.user);
+      const { data: authData } = await api.post('/auth/register', { name, email, password });
+      const { data: userData } = await api.get('/auth/me', {
+        headers: { Authorization: `Bearer ${authData.accessToken}` }
+      });
+      await login(authData.accessToken, userData);
     } catch (error: any) {
       Alert.alert('Registration Failed', error.response?.data?.message || 'Something went wrong');
     } finally {

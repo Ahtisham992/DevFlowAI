@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FolderGit2, FileText, Bot, GitBranch, Activity } from 'lucide-react';
 import api from '@/lib/axios';
 import { cn } from '@/lib/utils';
 import { GithubRepoView } from '@/components/projects/GithubRepoView';
+import { ChatInterface } from '@/components/chat/ChatInterface';
 
 interface Project {
     id: string;
@@ -130,24 +131,7 @@ export default function ProjectDetailPage() {
             )}
 
             {activeTab === 'Notes' && (
-                <div className="space-y-3">
-                    {project.notes.length === 0 ? (
-                        <div className="border rounded-xl p-12 text-center text-muted-foreground">
-                            <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p className="font-medium">No notes yet</p>
-                            <p className="text-sm mt-1">Notes for this project will appear here</p>
-                        </div>
-                    ) : (
-                        project.notes.map((note) => (
-                            <div key={note.id} className="border rounded-xl p-4 hover:shadow-sm transition">
-                                <p className="font-medium">{note.title}</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {new Date(note.updatedAt).toLocaleDateString()}
-                                </p>
-                            </div>
-                        ))
-                    )}
-                </div>
+                <ProjectNotesTab projectId={project.id} initialNotes={project.notes} />
             )}
 
             {activeTab === 'Code' && (
@@ -155,12 +139,74 @@ export default function ProjectDetailPage() {
             )}
 
             {activeTab === 'AI Chat' && (
-                <div className="border rounded-xl p-12 text-center text-muted-foreground">
-                    <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">AI Chat coming soon</p>
-                    <p className="text-sm mt-1">Chat with AI about this project in Week 4</p>
-                </div>
+                <ChatInterface projectId={project.id} />
             )}
+        </div>
+    );
+}
+
+function ProjectNotesTab({ projectId, initialNotes }: { projectId: string; initialNotes: any[] }) {
+    const queryClient = useQueryClient();
+    const router = import('next/navigation').then(m => m.useRouter);
+    // Note: Because router is tricky inside nested component in same file, we can just use window.location
+    const [title, setTitle] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
+
+    const handleCreate = async () => {
+        if (!title) return;
+        setIsCreating(true);
+        try {
+            const { data } = await api.post('/notes', { title, content: '', tags: [], projectId });
+            queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+            queryClient.invalidateQueries({ queryKey: ['notes'] });
+            window.location.href = `/dashboard/notes/${data.id}`;
+        } catch (e) {
+            console.error(e);
+            setIsCreating(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex gap-2">
+                <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="New Note Title..."
+                    className="flex-1 px-4 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                />
+                <button
+                    onClick={handleCreate}
+                    disabled={!title || isCreating}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                >
+                    {isCreating ? 'Creating...' : 'Create Note'}
+                </button>
+            </div>
+
+            <div className="space-y-3">
+                {initialNotes.length === 0 ? (
+                    <div className="border rounded-xl p-12 text-center text-muted-foreground">
+                        <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="font-medium">No notes yet</p>
+                        <p className="text-sm mt-1">Notes for this project will appear here</p>
+                    </div>
+                ) : (
+                    initialNotes.map((note) => (
+                        <div 
+                            key={note.id} 
+                            onClick={() => window.location.href = `/dashboard/notes/${note.id}`}
+                            className="border rounded-xl p-4 hover:shadow-sm transition cursor-pointer flex justify-between items-center"
+                        >
+                            <p className="font-medium">{note.title}</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(note.updatedAt).toLocaleDateString()}
+                            </p>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 }

@@ -1,53 +1,73 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../../store/auth.store';
-import { useWorkspaces, Workspace } from '../../hooks/useWorkspaces';
-import { Briefcase, FolderGit2, FileText } from 'lucide-react-native';
+import { useWorkspaces, Workspace, useDeleteWorkspace } from '../../hooks/useWorkspaces';
+import { Briefcase, FolderGit2, FileText, Pencil, Trash2, Plus, ChevronRight } from 'lucide-react-native';
 
 export default function WorkspacesScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
-  const { data: workspaces, isLoading, isError, refetch } = useWorkspaces();
+  const { data: workspaces, isLoading, isError, error, refetch } = useWorkspaces();
+  const deleteMutation = useDeleteWorkspace();
+
+  const handleLogout = () => {
+    Alert.alert('Log Out', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Log Out', style: 'destructive', onPress: logout },
+    ]);
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    Alert.alert('Delete Workspace', `Are you sure you want to delete "${name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteMutation.mutate(id) },
+    ]);
+  };
+
+  if (isError) {
+    console.error('Workspaces fetch error:', error);
+  }
 
   const renderItem = ({ item }: { item: Workspace }) => (
-    <View style={styles.card}>
+    <TouchableOpacity 
+      style={styles.card}
+      onPress={() => navigation.navigate('ProjectsList', { workspaceId: item.id, workspaceName: item.name })}
+    >
       <View style={styles.cardHeader}>
         <View style={styles.cardIcon}>
           <Briefcase color="#111" size={24} />
         </View>
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardSubtitle}>{item.role}</Text>
+          <Text style={styles.cardSubtitle}>Role: {item.role}</Text>
         </View>
       </View>
       
       <View style={styles.cardActions}>
         <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('ProjectsList', { workspaceId: item.id, workspaceName: item.name })}
+          style={styles.actionIconButton} 
+          onPress={() => navigation.navigate('WorkspaceForm', { workspaceToEdit: item })}
         >
-          <FolderGit2 color="#444" size={18} />
-          <Text style={styles.actionText}>Projects</Text>
+          <Pencil color="#666" size={20} />
         </TouchableOpacity>
-
         <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('NotesList', { workspaceId: item.id, workspaceName: item.name })}
+          style={styles.actionIconButton} 
+          onPress={() => handleDelete(item.id, item.name)}
         >
-          <FileText color="#444" size={18} />
-          <Text style={styles.actionText}>Notes</Text>
+          <Trash2 color="#ff4444" size={20} />
         </TouchableOpacity>
+        <ChevronRight color="#ccc" size={24} style={{ marginLeft: 'auto' }} />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerTextContainer}>
           <Text style={styles.title}>Workspaces</Text>
-          <Text style={styles.subtitle}>Welcome back, {user?.name || user?.email?.split('@')[0]}</Text>
+          <Text style={styles.subtitle}>{user?.email}</Text>
         </View>
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </View>
@@ -68,7 +88,7 @@ export default function WorkspacesScreen({ navigation }: any) {
           <View style={styles.center}>
             <Briefcase color="#ccc" size={48} style={{ marginBottom: 16 }} />
             <Text style={styles.emptyTitle}>No workspaces yet</Text>
-            <Text style={styles.emptySubtitle}>Create one on the web dashboard to get started.</Text>
+            <Text style={styles.emptySubtitle}>Create a workspace to get started.</Text>
           </View>
         ) : (
           <FlatList
@@ -76,10 +96,19 @@ export default function WorkspacesScreen({ navigation }: any) {
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
             contentContainerStyle={styles.list}
+            refreshing={isLoading}
+            onRefresh={refetch}
             showsVerticalScrollIndicator={false}
           />
         )}
       </View>
+
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => navigation.navigate('WorkspaceForm')}
+      >
+        <Plus color="#fff" size={24} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -95,9 +124,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  headerTextContainer: {
+    flex: 1,
   },
   title: {
     fontSize: 28,
@@ -107,18 +139,16 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#666',
-    marginTop: 4,
   },
   logoutButton: {
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     backgroundColor: '#f5f5f5',
-    borderRadius: 6,
+    borderRadius: 8,
   },
   logoutText: {
-    color: '#333',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: '#111',
+    fontWeight: '600',
   },
   listContainer: {
     flex: 1,
@@ -131,6 +161,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
+    flexDirection: 'column',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -146,12 +177,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f4ff',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
   },
-  cardContent: {
+  cardInfo: {
     flex: 1,
   },
   cardTitle: {
@@ -160,31 +191,24 @@ const styles = StyleSheet.create({
     color: '#111',
     marginBottom: 4,
   },
-  cardSubtitle: {
-    fontSize: 14,
+  cardRole: {
+    fontSize: 12,
     color: '#888',
+    fontWeight: '500',
   },
   cardActions: {
     flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 16,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f9f9f9',
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginHorizontal: 4,
+    justifyContent: 'flex-end',
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f5',
+    paddingTop: 12,
   },
-  actionText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#444',
+  actionIconButton: {
+    padding: 8,
+    marginRight: 8,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
   },
   center: {
     flex: 1,
@@ -217,5 +241,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    backgroundColor: '#000',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
   },
 });

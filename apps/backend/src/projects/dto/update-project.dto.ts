@@ -15,5 +15,9 @@ export class UpdateProjectDto {
 
   @IsString()
   @IsOptional()
+  framework?: string;
+
+  @IsString()
+  @IsOptional()
   githubUrl?: string;
 }

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/axios';
 
 export interface Project {
@@ -30,5 +30,47 @@ export const useProject = (projectId: string) => {
       return data;
     },
     enabled: !!projectId,
+  });
+};
+
+export const useCreateProject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (projectData: Partial<Project> & { workspaceId: string }) => {
+      const { data } = await api.post('/projects', projectData);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+};
+
+export const useUpdateProject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...projectData }: Partial<Project> & { id: string }) => {
+      const { data } = await api.patch(`/projects/${id}`, projectData);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+};
+
+export const useDeleteProject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/projects/${id}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
   });
 };
