@@ -84,8 +84,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
   header: {
-    padding: 24,
-    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 24,
     backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
@@ -100,7 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#111',
   },

@@ -49,10 +49,10 @@ export default function Sidebar() {
         <aside className="w-64 border-r flex flex-col h-screen p-4">
             {/* Logo */}
             <div className="flex items-center justify-between mb-8 px-2">
-                <div className="flex items-center gap-2">
+                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <Image src={logoImage} alt="DevFlow AI Logo" className="w-8 h-8 rounded" />
                     <span className="text-lg font-bold">DevFlow AI</span>
-                </div>
+                </Link>
                 <ThemeToggle />
             </div>
 

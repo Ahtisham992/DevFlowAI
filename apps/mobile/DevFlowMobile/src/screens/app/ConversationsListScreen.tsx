@@ -49,6 +49,9 @@ export default function ConversationsListScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>AI Chats</Text>
+      </View>
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.id}
@@ -77,6 +80,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 80,
+    paddingBottom: 24,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#111',
   },
   center: {
     flex: 1,
