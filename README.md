@@ -1,104 +1,126 @@
-# DevFlow AI 🚀
+<div align="center">
+  <img src="https://raw.githubusercontent.com/Ahtisham992/DevFlowAI/main/apps/web/public/logo.png" alt="DevFlow AI Logo" width="120" />
+  <h1>DevFlow AI 🚀</h1>
+  <p><strong>One workspace. Every developer workflow. Zero cloud dependency for AI.</strong></p>
 
-> One workspace. Every developer workflow. Zero cloud dependency for AI.
-
-![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![License](https://img.shields.io/badge/license-MIT-blue)
-
-## What is DevFlow AI?
-
-DevFlow AI is a unified, AI-powered developer workspace that eliminates
-context-switching by bringing project planning, code understanding,
-intelligent debugging, automated documentation, and persistent developer
-notes into a single cohesive platform.
-
-Powered by locally-running LLMs via Ollama — your code never leaves
-your machine.
+  <p>
+    <img src="https://img.shields.io/badge/status-Production%20Ready-success" alt="Status" />
+    <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
+    <img src="https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-lightgrey" alt="Platforms" />
+  </p>
+</div>
 
 ---
 
-## Tech Stack
+## 🌟 What is DevFlow AI?
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 15, Tailwind CSS, shadcn/ui |
-| Backend | NestJS, PostgreSQL, Redis |
-| AI | Ollama (Llama3, Mistral, CodeLlama) |
-| Mobile | React Native CLI |
-| ORM | Prisma |
-| Auth | JWT + Refresh Tokens |
+**DevFlow AI** is a unified, AI-powered developer workspace designed to completely eliminate context-switching. 
+
+It brings project planning, intelligent codebase analysis, real-time RAG (Retrieval-Augmented Generation), automated debugging, and persistent developer notes into a single cohesive platform. 
+
+Most importantly, DevFlow AI is powered by locally-running Large Language Models (LLMs) via **Ollama**. Your proprietary code never leaves your machine. No API costs. Total privacy.
 
 ---
 
-## Project Structure
+## 🏗️ Architecture & Tech Stack
+
+DevFlow AI is built as a robust **Monorepo** using the latest enterprise-grade technologies.
+
+| Layer | Technology | Description |
+|---|---|---|
+| **Web App** | Next.js 15, React 19, Tailwind CSS | App Router, Server Components, shadcn/ui components |
+| **Mobile App** | React Native CLI | Native iOS & Android application sharing the same core backend |
+| **Backend API** | NestJS | Modular architecture, WebSockets (Socket.io) for real-time progress |
+| **Database** | PostgreSQL 16 + pgvector | Relational data + Vector embeddings for semantic AI search |
+| **Cache & Auth** | Redis | JWT Token blacklisting and session management |
+| **AI Runtime** | Ollama | Local execution of Llama 3, Mistral, and Nomic Embeddings |
+| **ORM** | Prisma 7 | Type-safe database interactions and automated migrations |
+| **State** | Zustand + React Query | Global UI state management and server-data caching |
+
+---
+
+## ✨ Core Features
+
+- 🔒 **Stateless & Secure Auth**: JWT-based authentication with seamless background token refreshing and Redis-backed logout blacklisting.
+- 📂 **Workspaces & Projects**: Organize your codebase hierarchy to keep mental context clean.
+- 📝 **Markdown Developer Notes**: Live-preview markdown editor with auto-save and syntax highlighting.
+- 🧠 **Context-Aware AI Chat**: Ask questions about your code. The backend uses `pgvector` to perform semantic similarity searches across your indexed repositories to provide pinpoint accurate answers.
+- ⚡ **Real-Time Streaming**: AI responses are streamed token-by-token to both Web and Mobile via Server-Sent Events (SSE).
+- 📱 **Cross-Platform Sync**: The React Native mobile app shares the exact same backend and database, meaning your notes and AI chats are available on the go.
+
+---
+
+## 📂 Repository Structure
+
+```text
 devflow-ai/
 ├── apps/
-│   ├── web/          # Next.js frontend
-│   ├── backend/      # NestJS backend
-│   └── mobile/       # React Native app
-├── packages/
-│   └── shared/       # Shared types and utilities
-├── docker-compose.yml
-└── README.md
+│   ├── web/          # Next.js Web Frontend (Port 3000)
+│   ├── backend/      # NestJS API Server (Port 3001)
+│   └── mobile/       # React Native iOS & Android App
+├── documents/        # Detailed Engineering Architecture Guides
+├── docker-compose.yml# Local Infrastructure (Postgres, Redis, Ollama)
+└── package.json      # Root workspace configuration
+```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 20+
-- Docker Desktop
+- Docker Desktop (with WSL 2 enabled on Windows)
 - Git
 
-### 1. Clone the repo
-```bash
-git clone https://github.com/YOUR_USERNAME/devflow-ai.git
-cd devflow-ai
-```
-
-### 2. Start infrastructure
+### 1. Start the Infrastructure
+We use Docker to instantly spin up PostgreSQL (with pgvector), Redis, and Ollama.
 ```bash
 docker compose up -d
 ```
 
-### 3. Setup backend
+### 2. Pull the AI Models
+You need an LLM for chat and an embedding model for vectorizing your code.
+```bash
+docker exec -it devflow_ollama ollama pull llama3
+docker exec -it devflow_ollama ollama pull nomic-embed-text
+```
+
+### 3. Setup the Backend
 ```bash
 cd apps/backend
-cp .env.example .env
-# Fill in your .env values
+cp .env.example .env  # Ensure variables map to the docker ports
 npm install
 npx prisma migrate dev
-npx prisma db seed
+npx prisma db seed    # Optional: populate test data
 npm run start:dev
 ```
 
-### 4. Setup frontend
+### 4. Setup the Web Frontend
+In a new terminal:
 ```bash
 cd apps/web
 npm install
 npm run dev
 ```
+Open `http://localhost:3000` to view the web application.
 
-### 5. Pull AI model
+### 5. Setup the Mobile App
+In a new terminal:
 ```bash
-docker exec -it devflow_ollama ollama pull llama3
+cd apps/mobile/DevFlowMobile
+npm install
+npm start -- --reset-cache
 ```
 
 ---
 
-## Development Roadmap
-
-- [x] Week 1-2: Foundation & monorepo setup
-- [ ] Week 3-4: Authentication system
-- [ ] Week 5-6: Dashboard & projects
-- [ ] Week 7-8: Notes system
-- [ ] Week 9-10: AI chat core
-- [ ] Week 11-12: AI tools & RAG
-- [ ] Week 13-14: GitHub integration
-- [ ] Week 15-16: Mobile app
-- [ ] Week 17-18: Deployment & portfolio
+## 📚 Documentation
+For an exhaustive, deep-dive look into how this system was built, please refer to the markdown guides located in the `/documents` folder:
+- `DevFlowAI-Documentation_1.md`: Weeks 1-3 (Foundation & Auth)
+- `DevFlowAI-Documentation_2.md`: Weeks 4-10 (RAG, WebSockets, GitHub Indexing)
+- `DevFlowAI-Documentation_3.md`: Weeks 11-12 (Mobile App & Polish)
 
 ---
 
-## License
-MIT
+## 📄 License
+This project is licensed under the MIT License.
