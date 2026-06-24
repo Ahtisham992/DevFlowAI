@@ -1,10 +1,25 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Bot, Code, Zap, GitBranch, Terminal } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 import logoImage from "../../public/logo.png";
+import { useAuthStore } from "@/store/auth.store";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase()
+    : user?.email?.[0].toUpperCase() ?? '?';
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Header */}
@@ -12,23 +27,37 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Image src={logoImage} alt="DevFlow AI Logo" className="w-8 h-8 rounded" />
-            <span className="font-bold text-xl tracking-tight">DevFlow AI</span>
+            <span className="font-bold text-xl tracking-tight hidden sm:block">DevFlow AI</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <nav className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground mr-4">
               <a href="#features" className="hover:text-foreground transition-colors">Features</a>
               <a href="#about" className="hover:text-foreground transition-colors">About</a>
             </nav>
             <ThemeToggle />
-            <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
-              Sign In
-            </Link>
-            <Link 
-              href="/register" 
-              className="hidden sm:inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity"
-            >
-              Get Started
-            </Link>
+            
+            {mounted && isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link href="/dashboard" className="hidden sm:inline-flex text-sm font-medium hover:text-primary transition-colors">
+                  Dashboard
+                </Link>
+                <Link href="/dashboard" className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold hover:opacity-90 transition-opacity">
+                  {initials}
+                </Link>
+              </div>
+            ) : mounted ? (
+              <>
+                <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
+                  Sign In
+                </Link>
+                <Link 
+                  href="/register" 
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity"
+                >
+                  Get Started
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       </header>
