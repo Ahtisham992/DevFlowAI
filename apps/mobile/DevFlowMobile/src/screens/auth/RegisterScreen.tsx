@@ -22,7 +22,7 @@ export default function RegisterScreen({ navigation }: any) {
       const { data: userData } = await api.get('/auth/me', {
         headers: { Authorization: `Bearer ${authData.accessToken}` }
       });
-      await login(authData.accessToken, userData);
+      await login(authData.accessToken, authData.refreshToken, userData);
     } catch (error: any) {
       Alert.alert('Registration Failed', error.response?.data?.message || 'Something went wrong');
     } finally {
