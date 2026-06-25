@@ -21,9 +21,8 @@ export default function ProfileScreen() {
       const { data } = await api.put('/auth/profile', { name });
       // To correctly update the store without losing tokens, we ideally need the current tokens
       // But setAuth expects (user, token), so this might overwrite the token if we pass undefined.
-      // Assuming setAuth in Mobile just updates what we pass. Let's check auth.store.ts later if this causes issues.
-      // For now, let's just trigger a store update.
-      setAuth(data, useAuthStore.getState().token || '');
+      // Assuming setAuth in Mobile just updates what we pass.
+      setAuth(data, useAuthStore.getState().token || '', useAuthStore.getState().refreshToken || '');
       Alert.alert('Success', 'Profile updated successfully!');
     } catch (error: any) {
       Alert.alert('Error', error.response?.data?.message || 'Failed to update profile');
