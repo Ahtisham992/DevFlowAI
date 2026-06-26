@@ -71,10 +71,15 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="min-h-screen flex items-center justify-center bg-background relative">
+            <Link href="/" className="absolute top-8 left-8 text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 transition">
+                &larr; Back to Home
+            </Link>
             <div className="w-full max-w-md p-8 space-y-6 border rounded-xl shadow-sm">
                 <div className="space-y-2 text-center flex flex-col items-center">
-                    <Image src={logoImage} alt="DevFlow AI Logo" className="w-16 h-16 rounded mb-2" />
+                    <Link href="/">
+                        <Image src={logoImage} alt="DevFlow AI Logo" className="w-16 h-16 rounded mb-2 hover:opacity-90 transition" />
+                    </Link>
                     <h1 className="text-3xl font-bold">Create an account</h1>
                     <p className="text-muted-foreground">Enter your details to get started</p>
                 </div>
