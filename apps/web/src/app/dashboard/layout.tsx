@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth.store';
 import LoadingScreen from '@/components/loading-screen';
 import Sidebar from '@/components/layout/sidebar';
 import Header from '@/components/layout/header';
+import { HelpButton } from '@/components/layout/HelpButton';
 import { SocketProvider } from '@/components/providers/SocketProvider';
 
 export default function DashboardLayout({
@@ -32,14 +33,14 @@ export default function DashboardLayout({
 
     return (
         <SocketProvider>
-            <div className="min-h-screen bg-background flex flex-col md:flex-row">
+            <div className="min-h-screen bg-background flex flex-col md:flex-row relative">
                 {/* Mobile Header (visible only on md:hidden) */}
                 <div className="md:hidden">
                     <Header />
                 </div>
                 
                 {/* Sidebar (hidden on mobile, fixed on desktop) */}
-                <aside className="hidden md:flex w-64 flex-col border-r bg-card fixed h-screen">
+                <aside className="hidden md:flex w-64 flex-col border-r bg-card fixed h-screen z-10">
                     <Sidebar />
                 </aside>
                 
@@ -51,11 +52,14 @@ export default function DashboardLayout({
                     </div>
                     
                     <main className="flex-1 p-6 overflow-auto">
-                        <div className="max-w-6xl mx-auto w-full">
+                        <div className="max-w-6xl mx-auto w-full relative">
                             {children}
                         </div>
                     </main>
                 </div>
+                
+                {/* Global Help Button */}
+                <HelpButton />
             </div>
         </SocketProvider>
     );

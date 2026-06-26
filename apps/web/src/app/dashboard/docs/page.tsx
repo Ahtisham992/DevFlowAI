@@ -30,7 +30,7 @@ export default function DocsPage() {
         queryKey: ['models'],
         queryFn: async () => {
             const { data } = await api.get<{ name: string }[]>('/ai/models');
-            return data;
+            return data.filter(m => m.name.toLowerCase().includes('llama'));
         },
     });
 
@@ -56,7 +56,7 @@ export default function DocsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold flex items-center gap-2">
                         <FileSignature className="w-8 h-8 text-primary" />
@@ -66,11 +66,11 @@ export default function DocsPage() {
                         Instantly generate beautiful markdown documentation for your code using AI.
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                     <select
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
-                        className="text-sm bg-background border rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-primary min-w-[150px]"
+                        className="flex-1 sm:flex-none text-sm bg-background border rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-primary min-w-[150px]"
                         disabled={isGenerating}
                     >
                         {models.map((m) => (
@@ -82,7 +82,7 @@ export default function DocsPage() {
                     <button
                         onClick={handleGenerate}
                         disabled={isGenerating || !code.trim()}
-                        className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50"
                     >
                         {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                         {isGenerating ? 'Generating...' : 'Generate Docs'}
@@ -90,7 +90,7 @@ export default function DocsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)] min-h-[600px]">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[800px] lg:min-h-[600px] lg:h-[calc(100vh-200px)]">
                 {/* Input Panel */}
                 <div className="border rounded-xl overflow-hidden flex flex-col bg-card shadow-sm">
                     <div className="bg-muted px-4 py-2 border-b text-sm font-medium">

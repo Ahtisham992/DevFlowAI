@@ -7,7 +7,7 @@ const Stack = createNativeStackNavigator();
 
 export default function AiChatStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen 
         name="ConversationsList" 
         component={ConversationsListScreen} 

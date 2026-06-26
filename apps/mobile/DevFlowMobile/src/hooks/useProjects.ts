@@ -15,10 +15,19 @@ export const useProjects = (workspaceId: string) => {
     queryKey: ['workspaces', workspaceId, 'projects'],
     queryFn: async (): Promise<Project[]> => {
       const { data } = await api.get(`/workspaces/${workspaceId}`);
-      // The workspaces endpoint returns the workspace with its projects included
       return data.projects || [];
     },
     enabled: !!workspaceId,
+  });
+};
+
+export const useAllProjects = () => {
+  return useQuery({
+    queryKey: ['projects', 'all'],
+    queryFn: async (): Promise<Project[]> => {
+      const { data } = await api.get('/projects');
+      return data || [];
+    },
   });
 };
 

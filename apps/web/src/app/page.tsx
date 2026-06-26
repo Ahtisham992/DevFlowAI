@@ -35,7 +35,7 @@ export default function Home() {
               <a href="#about" className="hover:text-foreground transition-colors">About</a>
             </nav>
             <ThemeToggle />
-            
+
             {mounted && isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="hidden sm:inline-flex text-sm font-medium hover:text-primary transition-colors">
@@ -50,8 +50,8 @@ export default function Home() {
                 <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
                   Sign In
                 </Link>
-                <Link 
-                  href="/register" 
+                <Link
+                  href="/register"
                   className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity"
                 >
                   Get Started
@@ -69,7 +69,7 @@ export default function Home() {
           <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
             <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }}></div>
           </div>
-          
+
           <div className="container mx-auto max-w-7xl px-4 text-center">
             <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-foreground mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
               Your AI-Powered <br className="hidden sm:block" />
@@ -81,14 +81,14 @@ export default function Home() {
               DevFlow AI brings your workspaces, projects, notes, and an intelligent AI assistant together into one seamless, blazingly fast environment.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300">
-              <Link 
-                href="/register" 
+              <Link
+                href="/register"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all gap-2"
               >
                 Start Building Free <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-foreground border shadow-sm hover:bg-muted/50 transition-all"
               >
                 Go to Dashboard
@@ -106,7 +106,7 @@ export default function Home() {
                 A carefully crafted suite of tools designed to eliminate context switching and keep you in the flow state.
               </p>
             </div>
-            
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* Feature 1 */}
               <div className="bg-card border rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
