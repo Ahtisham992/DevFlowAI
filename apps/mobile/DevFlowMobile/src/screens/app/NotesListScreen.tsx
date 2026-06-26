@@ -31,12 +31,14 @@ export default function NotesListScreen({ route, navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ArrowLeft color="#111" size={24} />
-        </TouchableOpacity>
+        {workspaceName && (
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <ArrowLeft color="#111" size={24} />
+          </TouchableOpacity>
+        )}
         <View style={styles.headerTextContainer}>
-          <Text style={styles.title}>{workspaceName}</Text>
-          <Text style={styles.subtitle}>AI Notes</Text>
+          <Text style={styles.title}>{workspaceName || 'Notes'}</Text>
+          <Text style={styles.subtitle}>{workspaceName ? 'AI Notes' : 'All your AI notes'}</Text>
         </View>
       </View>
 
@@ -185,5 +187,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#111',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 });

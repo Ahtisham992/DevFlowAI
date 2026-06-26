@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useAuthStore } from '../../store/auth.store';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import { useNotes } from '../../hooks/useNotes';
 import { useConversations } from '../../hooks/useConversations';
-import { FolderGit2, FileText, Bot } from 'lucide-react-native';
+import { FolderGit2, FileText, Bot, Plus, MessageSquare, Info } from 'lucide-react-native';
+import { HelpModal } from '../../components/HelpModal';
 
 export default function DashboardScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
+  const [isHelpVisible, setIsHelpVisible] = useState(false);
 
   const { data: workspaces, isLoading: loadingW } = useWorkspaces();
   const { data: notes, isLoading: loadingN } = useNotes();
@@ -21,20 +23,25 @@ export default function DashboardScreen({ navigation }: any) {
     { label: 'AI Chats', value: chats?.length || 0, icon: Bot, route: 'AI Chat' },
   ];
 
+  const recentNotes = notes 
+    ? [...notes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 3)
+    : [];
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.title}>Welcome back,</Text>
-            <Text style={styles.titleName}>{user?.name || 'Developer'}</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.titleName}>Dashboard</Text>
+            <Text style={styles.subtitle}>Welcome back, {user?.name || 'Developer'}</Text>
           </View>
-          {/* <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-            <Text style={styles.logoutText}>Log Out</Text>
-          </TouchableOpacity> */}
+          <TouchableOpacity onPress={() => setIsHelpVisible(true)} style={styles.helpButton}>
+            <Info color="#111" size={24} />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.subtitle}>Your AI-powered developer workspace</Text>
       </View>
+
+      <HelpModal visible={isHelpVisible} onClose={() => setIsHelpVisible(false)} />
 
       {isLoading ? (
         <View style={styles.center}>
@@ -42,6 +49,36 @@ export default function DashboardScreen({ navigation }: any) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          
+          {/* Quick Actions */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickActionsContainer}>
+              <TouchableOpacity 
+                style={styles.actionPill} 
+                onPress={() => navigation.navigate('NotesTab', { screen: 'NoteFormScreen' })}
+              >
+                <Plus color="#111" size={16} />
+                <Text style={styles.actionPillText}>New Note</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.actionPill}
+                onPress={() => navigation.navigate('WorkspacesTab', { screen: 'WorkspaceFormScreen' })}
+              >
+                <Plus color="#111" size={16} />
+                <Text style={styles.actionPillText}>New Workspace</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.actionPill}
+                onPress={() => navigation.navigate('AI Chat')}
+              >
+                <MessageSquare color="#111" size={16} />
+                <Text style={styles.actionPillText}>AI Chat</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
+          {/* Stats Grid */}
           <View style={styles.grid}>
             {stats.map((stat, idx) => {
               const Icon = stat.icon;
@@ -60,6 +97,33 @@ export default function DashboardScreen({ navigation }: any) {
               );
             })}
           </View>
+
+          {/* Recent Notes */}
+          <View style={[styles.section, { marginTop: 8 }]}>
+            <Text style={styles.sectionTitle}>Recent Notes</Text>
+            {recentNotes.length === 0 ? (
+              <Text style={styles.emptyText}>No recent notes found.</Text>
+            ) : (
+              <View style={styles.recentList}>
+                {recentNotes.map((note, idx) => (
+                  <TouchableOpacity 
+                    key={note.id} 
+                    style={[styles.recentItem, idx === recentNotes.length - 1 && { borderBottomWidth: 0 }]}
+                    onPress={() => navigation.navigate('NotesTab', { screen: 'NoteDetailScreen', params: { note } })}
+                  >
+                    <View style={styles.recentItemIcon}>
+                      <FileText color="#666" size={18} />
+                    </View>
+                    <View style={styles.recentItemContent}>
+                      <Text style={styles.recentItemTitle} numberOfLines={1}>{note.title}</Text>
+                      <Text style={styles.recentItemDate}>{new Date(note.createdAt).toLocaleDateString()}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+
         </ScrollView>
       )}
     </View>
@@ -82,35 +146,67 @@ const styles = StyleSheet.create({
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    alignItems: 'center',
   },
-  title: {
-    fontSize: 20,
-    color: '#666',
+  headerTextContainer: {
+    flexDirection: 'column',
+    flex: 1,
+  },
+  helpButton: {
+    padding: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 20,
+    marginLeft: 16,
   },
   titleName: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#111',
   },
-  logoutButton: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  logoutText: {
-    color: '#ff4444',
-    fontWeight: '600',
-    fontSize: 14,
-  },
   subtitle: {
     fontSize: 16,
     color: '#666',
+    marginTop: 4,
   },
   content: {
     padding: 24,
+    paddingBottom: 40,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  quickActionsContainer: {
+    flexDirection: 'row',
+  },
+  actionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  actionPillText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111',
+    marginLeft: 8,
   },
   grid: {
     flexDirection: 'row',
@@ -147,6 +243,47 @@ const styles = StyleSheet.create({
   cardLabel: {
     fontSize: 14,
     color: '#666',
+  },
+  recentList: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    overflow: 'hidden',
+  },
+  recentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  recentItemIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  recentItemContent: {
+    flex: 1,
+  },
+  recentItemTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#111',
+    marginBottom: 4,
+  },
+  recentItemDate: {
+    fontSize: 12,
+    color: '#888',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#888',
+    fontStyle: 'italic',
   },
   center: {
     flex: 1,

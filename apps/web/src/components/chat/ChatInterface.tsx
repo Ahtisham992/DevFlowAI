@@ -55,7 +55,7 @@ export function ChatInterface({ projectId }: { projectId?: string }) {
         queryKey: ['models'],
         queryFn: async () => {
             const { data } = await api.get<{ name: string }[]>('/ai/models');
-            return data;
+            return data.filter(m => m.name.toLowerCase().includes('llama'));
         },
     });
 
@@ -177,9 +177,9 @@ export function ChatInterface({ projectId }: { projectId?: string }) {
 
     return (
         <div className="flex h-full border rounded-xl overflow-hidden bg-card min-h-[500px]">
-            {/* Sidebar - Hidden for Project Chats */}
+            {/* Sidebar - Hidden for Project Chats and Mobile */}
             {!projectId && (
-                <div className="w-64 border-r flex flex-col bg-muted/30">
+                <div className="hidden md:flex flex-col w-64 border-r bg-muted/30">
                     <div className="p-4 border-b">
                         <button
                             onClick={handleNewChat}
