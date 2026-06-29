@@ -21,7 +21,7 @@ import { NotificationsModule } from './notifications/notifications.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BullModule.forRoot({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       connection: (process.env.REDIS_URL
         ? new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: null })
         : {
