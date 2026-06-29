@@ -92,7 +92,7 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.config.get<string>('JWT_SECRET') || 'default_secret',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       expiresIn: (this.config.get<string>('JWT_EXPIRES_IN') || '15m') as any,
     });
 
@@ -100,8 +100,9 @@ export class AuthService {
       secret:
         this.config.get<string>('JWT_REFRESH_SECRET') ||
         'default_refresh_secret',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-      expiresIn: (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d') as any,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expiresIn: (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ||
+        '7d') as any,
     });
 
     return { accessToken, refreshToken };
