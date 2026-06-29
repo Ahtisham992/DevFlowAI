@@ -6,7 +6,7 @@ import api from '@/lib/axios';
 import { Loader2 } from 'lucide-react';
 
 export default function SettingsPage() {
-    const { user, setAuth } = useAuthStore();
+    const { user, accessToken, refreshToken, setAuth } = useAuthStore();
     
     // Profile State
     const [name, setName] = useState(user?.name || '');
@@ -30,7 +30,7 @@ export default function SettingsPage() {
         try {
             const { data } = await api.put('/auth/profile', { name });
             // Update auth store with new user data
-            setAuth(data, document.cookie.split('accessToken=')[1]?.split(';')[0] || '');
+            setAuth(data, accessToken || '', refreshToken || '');
             setProfileMessage('Profile updated successfully!');
         } catch (error: any) {
             setProfileMessage(error.response?.data?.message || 'Failed to update profile');
