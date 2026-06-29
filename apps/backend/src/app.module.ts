@@ -21,12 +21,13 @@ import { NotificationsModule } from './notifications/notifications.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BullModule.forRoot({
-      connection: process.env.REDIS_URL
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+      connection: (process.env.REDIS_URL
         ? new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: null })
         : {
             host: process.env.REDIS_HOST || 'localhost',
             port: parseInt(process.env.REDIS_PORT || '6379'),
-          },
+          }) as any,
     }),
     ThrottlerModule.forRoot([
       {
