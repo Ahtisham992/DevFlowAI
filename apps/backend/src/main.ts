@@ -20,6 +20,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://10.0.2.2:3000',
       'https://devflowai.vercel.app',
+      'https://dev-flow-ai-five.vercel.app',
     ],
     credentials: true,
   });
