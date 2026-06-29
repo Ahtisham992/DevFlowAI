@@ -8,11 +8,12 @@ import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
 import debounce from 'lodash.debounce';
 import api from '@/lib/axios';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Dynamically import MDEditor to avoid SSR window errors
 const MDEditor = dynamic(
     () => import('@uiw/react-md-editor').then((mod) => mod.default),
-    { ssr: false, loading: () => <div className="h-[600px] animate-pulse bg-muted rounded-xl" /> }
+    { ssr: false, loading: () => <Skeleton className="h-[600px] w-full rounded-xl" /> }
 );
 
 interface Note {

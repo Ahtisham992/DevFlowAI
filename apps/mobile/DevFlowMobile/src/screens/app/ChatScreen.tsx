@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Keyboard
 import { useMessages, Message } from '../../hooks/useConversations';
 import { Send, Bot, User, Square, ArrowLeft } from 'lucide-react-native';
 import Markdown from 'react-native-markdown-display';
+import LoadingState from '../../components/LoadingState';
 import { useAuthStore } from '../../store/auth.store';
 import EventSource from 'react-native-sse';
 import { useQueryClient } from '@tanstack/react-query';
@@ -162,9 +163,7 @@ export default function ChatScreen({ route, navigation }: any) {
       </View>
 
       {isLoading && messages.length === 0 ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#000" />
-        </View>
+        <LoadingState message="Loading messages..." />
       ) : (
         <FlatList
           ref={flatListRef}

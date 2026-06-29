@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useConversations, Conversation, useDeleteConversation } from '../../hooks/useConversations';
-import { MessageSquare, Plus, Trash2 } from 'lucide-react-native';
+import { MessageSquare, Plus, Trash2, Bot } from 'lucide-react-native';
+import LoadingState from '../../components/LoadingState';
+import ErrorState from '../../components/ErrorState';
+import EmptyState from '../../components/EmptyState';
 
 export default function ConversationsListScreen({ navigation }: any) {
   const { data: conversations, isLoading, refetch } = useConversations();
@@ -40,11 +43,7 @@ export default function ConversationsListScreen({ navigation }: any) {
   );
 
   if (isLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
+    return <LoadingState message="Loading chats..." />;
   }
 
   return (
@@ -60,10 +59,11 @@ export default function ConversationsListScreen({ navigation }: any) {
         refreshing={isLoading}
         onRefresh={refetch}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No conversations yet.</Text>
-            <Text style={styles.emptySubtext}>Start a new chat to ask DevFlow AI!</Text>
-          </View>
+          <EmptyState 
+            icon={Bot} 
+            title="No conversations yet" 
+            message="Start a new chat to ask DevFlow AI!" 
+          />
         }
       />
       <TouchableOpacity 

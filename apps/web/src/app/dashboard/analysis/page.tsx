@@ -2,8 +2,14 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import CodeMirror from '@uiw/react-codemirror';
+import dynamic from 'next/dynamic';
 import { javascript } from '@codemirror/lang-javascript';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const CodeMirror = dynamic(
+    () => import('@uiw/react-codemirror').then((mod) => mod.default),
+    { ssr: false, loading: () => <Skeleton className="h-[400px] w-full rounded-2xl" /> }
+);
 import { 
     Code, 
     AlertCircle, 

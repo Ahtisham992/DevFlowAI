@@ -6,6 +6,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { useConversations } from '../../hooks/useConversations';
 import { FolderGit2, FileText, Bot, Plus, MessageSquare, Info } from 'lucide-react-native';
 import { HelpModal } from '../../components/HelpModal';
+import LoadingState from '../../components/LoadingState';
 
 export default function DashboardScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
@@ -44,9 +45,7 @@ export default function DashboardScreen({ navigation }: any) {
       <HelpModal visible={isHelpVisible} onClose={() => setIsHelpVisible(false)} />
 
       {isLoading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#000" />
-        </View>
+        <LoadingState message="Loading dashboard..." />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           

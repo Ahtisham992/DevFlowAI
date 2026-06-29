@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useProjects, Project } from '../../hooks/useProjects';
 import { FolderGit2, ChevronRight, ArrowLeft, Plus } from 'lucide-react-native';
+import LoadingState from '../../components/LoadingState';
+import ErrorState from '../../components/ErrorState';
+import EmptyState from '../../components/EmptyState';
 
 export default function ProjectsListScreen({ route, navigation }: any) {
   const { workspaceId, workspaceName } = route.params;
@@ -37,22 +40,15 @@ export default function ProjectsListScreen({ route, navigation }: any) {
 
       <View style={styles.listContainer}>
         {isLoading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#000" />
-          </View>
+          <LoadingState message="Loading projects..." />
         ) : isError ? (
-          <View style={styles.center}>
-            <Text style={styles.errorText}>Failed to load projects.</Text>
-            <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
+          <ErrorState message="Failed to load projects." onRetry={refetch} />
         ) : projects?.length === 0 ? (
-          <View style={styles.center}>
-            <FolderGit2 color="#ccc" size={48} style={{ marginBottom: 16 }} />
-            <Text style={styles.emptyTitle}>No projects yet</Text>
-            <Text style={styles.emptySubtitle}>Add a project from the web app.</Text>
-          </View>
+          <EmptyState 
+            icon={FolderGit2} 
+            title="No projects yet" 
+            message="Add a project from the web app." 
+          />
         ) : (
           <FlatList
             data={projects}
