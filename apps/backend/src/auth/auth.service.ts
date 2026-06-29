@@ -91,13 +91,13 @@ export class AuthService {
     const payload = { sub: userId, email };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.config.get('JWT_SECRET'),
-      expiresIn: this.config.get('JWT_EXPIRES_IN'),
+      secret: this.config.get<string>('JWT_SECRET') || 'default_secret',
+      expiresIn: this.config.get<string>('JWT_EXPIRES_IN') || '15m',
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.config.get('JWT_REFRESH_SECRET'),
-      expiresIn: this.config.get('JWT_REFRESH_EXPIRES_IN'),
+      secret: this.config.get<string>('JWT_REFRESH_SECRET') || 'default_refresh_secret',
+      expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
     });
 
     return { accessToken, refreshToken };
