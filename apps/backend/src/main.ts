@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,7 +13,16 @@ async function bootstrap() {
     }),
   );
 
-  app.enableCors();
+  app.use(helmet());
+
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'http://10.0.2.2:3000',
+      'https://devflowai.vercel.app',
+    ],
+    credentials: true,
+  });
 
   await app.listen(process.env.PORT ?? 3001);
   console.log(

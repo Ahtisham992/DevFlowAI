@@ -3808,16 +3808,16 @@ MIT
 
 | Day | Focus | Tasks |
 |-----|-------|-------|
-| 81 | Neon DB setup | Create database, run migrations |
-| 82 | Railway backend | Deploy Docker container |
-| 83 | Vercel frontend | Connect repo, configure env vars |
-| 84 | Upstash Redis | Set up, connect to backend |
-| 85 | Ollama (Oracle VM) | Set up Oracle free VM, deploy Ollama |
-| 86 | CI/CD pipeline | GitHub Actions deploy on main push |
-| 87 | Production testing | Test all features on live URLs |
-| 88 | Screenshots + demo | Record Loom video, capture screenshots |
-| 89 | README complete | Full README, architecture diagram |
-| 90 | Portfolio launch | Update portfolio, LinkedIn post, GitHub public |
+| 81 | Neon DB setup | Create free DB, enable pgvector, run migrations |
+| 82 | Upstash Redis | Set up serverless free tier Redis |
+| 83 | Oracle Cloud VM | Set up Always Free ARM VM, install Docker & Ollama |
+| 84 | Render backend | Deploy NestJS API on Render Web Service (Free) |
+| 85 | Vercel frontend | Deploy Next.js app on Vercel Hobby tier |
+| 86 | Mobile config | Set production endpoints for React Native |
+| 87 | Production testing | End-to-End testing on live URLs |
+| 88 | CI/CD pipeline | GitHub Actions automated deploys |
+| 89 | Architecture assets| Generate architecture diagrams, finalize README |
+| 90 | Portfolio launch | Record Loom, LinkedIn post, make public |
 
 ---
 
@@ -3832,7 +3832,7 @@ MIT
 | AI Chat working | Day 50 | Streaming chat E2E |
 | AI Tools + RAG | Day 60 | All AI features |
 | GitHub + Notifications | Day 70 | GitHub integration |
-| Mobile complete | Day 77 | Flutter app functional |
+| Mobile complete | Day 77 | React Native app functional |
 | Tests + Polish | Day 80 | 70% test coverage |
 | **Live in production** | Day 87 | Public URL working |
 | **Portfolio ready** | Day 90 | Open sourced, showcased |
