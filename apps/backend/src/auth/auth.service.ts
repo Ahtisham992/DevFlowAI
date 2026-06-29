@@ -92,14 +92,17 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.config.get<string>('JWT_SECRET') || 'default_secret',
-      expiresIn: this.config.get<string>('JWT_EXPIRES_IN') || '15m',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expiresIn: (this.config.get<string>('JWT_EXPIRES_IN') || '15m') as any,
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret:
         this.config.get<string>('JWT_REFRESH_SECRET') ||
         'default_refresh_secret',
-      expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      expiresIn: (this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ||
+        '7d') as any,
     });
 
     return { accessToken, refreshToken };
