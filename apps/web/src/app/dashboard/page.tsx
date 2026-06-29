@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { FolderGit2, FileText, Bot, Plus, Clock, Lightbulb, ChevronRight, MessageSquare } from 'lucide-react';
 import api from '@/lib/axios';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TIPS = [
     "Use 'AI Chat' to quickly generate boilerplate code.",
@@ -24,20 +25,22 @@ export default function DashboardPage() {
         setTipIndex(Math.floor(Math.random() * TIPS.length));
     }, []);
 
-    const { data: workspaces = [] } = useQuery({
+    const { data: workspaces = [], isLoading: workspacesLoading } = useQuery({
         queryKey: ['workspaces'],
         queryFn: async () => (await api.get('/workspaces')).data,
     });
 
-    const { data: notes = [] } = useQuery({
+    const { data: notes = [], isLoading: notesLoading } = useQuery({
         queryKey: ['notes'],
         queryFn: async () => (await api.get('/notes')).data,
     });
 
-    const { data: chats = [] } = useQuery({
+    const { data: chats = [], isLoading: chatsLoading } = useQuery({
         queryKey: ['chats'],
         queryFn: async () => (await api.get('/ai/conversations')).data,
     });
+
+    const isLoading = workspacesLoading || notesLoading || chatsLoading;
 
     // Get 3 most recent items by combining notes and workspaces, sorting by createdAt
     const recentActivity = [...notes.map((n: any) => ({ ...n, type: 'note', icon: FileText, href: '/dashboard/notes' })),
@@ -87,24 +90,30 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Stats */}
                 <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {[
-                        { label: 'Workspaces', value: workspaces.length, icon: FolderGit2, bg: 'bg-primary/10', color: 'text-primary' },
-                        { label: 'Notes', value: notes.length, icon: FileText, bg: 'bg-primary/10', color: 'text-primary' },
-                        { label: 'AI Chats', value: chats.length, icon: Bot, bg: 'bg-primary/10', color: 'text-primary' },
-                    ].map((stat) => {
-                        const Icon = stat.icon;
-                        return (
-                            <div key={stat.label} className="bg-card border rounded-2xl p-5 shadow-sm flex flex-col justify-between h-[140px]">
-                                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", stat.bg, stat.color)}>
-                                    <Icon className="w-5 h-5" />
+                    {isLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-[140px] rounded-2xl" />
+                        ))
+                    ) : (
+                        [
+                            { label: 'Workspaces', value: workspaces.length, icon: FolderGit2, bg: 'bg-primary/10', color: 'text-primary' },
+                            { label: 'Notes', value: notes.length, icon: FileText, bg: 'bg-primary/10', color: 'text-primary' },
+                            { label: 'AI Chats', value: chats.length, icon: Bot, bg: 'bg-primary/10', color: 'text-primary' },
+                        ].map((stat) => {
+                            const Icon = stat.icon;
+                            return (
+                                <div key={stat.label} className="bg-card border rounded-2xl p-5 shadow-sm flex flex-col justify-between h-[140px]">
+                                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", stat.bg, stat.color)}>
+                                        <Icon className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-3xl font-bold">{stat.value}</div>
+                                        <div className="text-sm font-medium text-muted-foreground">{stat.label}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div className="text-3xl font-bold">{stat.value}</div>
-                                    <div className="text-sm font-medium text-muted-foreground">{stat.label}</div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
 
                 {/* Recent Activity */}
@@ -114,7 +123,17 @@ export default function DashboardPage() {
                         Recent Activity
                     </h3>
                     <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-                        {recentActivity.length === 0 ? (
+                        {isLoading ? (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                                    <div className="flex-1 space-y-2">
+                                        <Skeleton className="h-4 w-3/4" />
+                                        <Skeleton className="h-3 w-1/2" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : recentActivity.length === 0 ? (
                             <p className="text-sm text-muted-foreground text-center py-4">No recent activity found.</p>
                         ) : (
                             recentActivity.map((item: any, idx) => {

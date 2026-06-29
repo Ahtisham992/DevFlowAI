@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, FolderGit2, Circle } from 'lucide-react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Workspace {
     id: string;
@@ -113,8 +114,8 @@ export default function ProjectsPage() {
 
             {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="border rounded-xl p-4 h-36 animate-pulse bg-muted" />
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="rounded-xl h-36" />
                     ))}
                 </div>
             ) : projects.length === 0 ? (

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileText, Trash2, Tag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Note {
     id: string;
@@ -117,8 +118,8 @@ export default function NotesPage() {
             {/* Notes grid */}
             {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="border rounded-xl p-4 h-32 animate-pulse bg-muted" />
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="rounded-xl h-32" />
                     ))}
                 </div>
             ) : notes.length === 0 ? (

@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useNotes, Note } from '../../hooks/useNotes';
 import { FileText, ChevronRight, ArrowLeft, Clock, Plus } from 'lucide-react-native';
+import LoadingState from '../../components/LoadingState';
+import ErrorState from '../../components/ErrorState';
+import EmptyState from '../../components/EmptyState';
 
 export default function NotesListScreen({ route, navigation }: any) {
   const { workspaceId, workspaceName } = route?.params || {};
@@ -44,22 +47,15 @@ export default function NotesListScreen({ route, navigation }: any) {
 
       <View style={styles.listContainer}>
         {isLoading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#000" />
-          </View>
+          <LoadingState message="Loading notes..." />
         ) : isError ? (
-          <View style={styles.center}>
-            <Text style={styles.errorText}>Failed to load notes.</Text>
-            <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
+          <ErrorState message="Failed to load notes." onRetry={refetch} />
         ) : notes?.length === 0 ? (
-          <View style={styles.center}>
-            <FileText color="#ccc" size={48} style={{ marginBottom: 16 }} />
-            <Text style={styles.emptyTitle}>No notes yet</Text>
-            <Text style={styles.emptySubtitle}>Generate an AI note from the web dashboard.</Text>
-          </View>
+          <EmptyState 
+            icon={FileText} 
+            title="No notes yet" 
+            message="Generate an AI note from the web dashboard." 
+          />
         ) : (
           <FlatList
             data={notes}

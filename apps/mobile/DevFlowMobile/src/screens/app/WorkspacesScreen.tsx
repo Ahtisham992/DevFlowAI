@@ -3,18 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, 
 import { useAuthStore } from '../../store/auth.store';
 import { useWorkspaces, Workspace, useDeleteWorkspace } from '../../hooks/useWorkspaces';
 import { Briefcase, FolderGit2, FileText, Pencil, Trash2, Plus, ChevronRight } from 'lucide-react-native';
-
+import LoadingState from '../../components/LoadingState';
+import ErrorState from '../../components/ErrorState';
+import EmptyState from '../../components/EmptyState';
 export default function WorkspacesScreen({ navigation }: any) {
   const { user, logout } = useAuthStore();
   const { data: workspaces, isLoading, isError, error, refetch } = useWorkspaces();
   const deleteMutation = useDeleteWorkspace();
 
-  const handleLogout = () => {
-    Alert.alert('Log Out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log Out', style: 'destructive', onPress: logout },
-    ]);
-  };
 
   const handleDelete = (id: string, name: string) => {
     Alert.alert('Delete Workspace', `Are you sure you want to delete "${name}"?`, [
@@ -28,7 +24,7 @@ export default function WorkspacesScreen({ navigation }: any) {
   }
 
   const renderItem = ({ item }: { item: Workspace }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.card}
       onPress={() => navigation.navigate('ProjectsList', { workspaceId: item.id, workspaceName: item.name })}
     >
@@ -41,16 +37,16 @@ export default function WorkspacesScreen({ navigation }: any) {
           <Text style={styles.cardSubtitle}>Role: {item.role}</Text>
         </View>
       </View>
-      
+
       <View style={styles.cardActions}>
-        <TouchableOpacity 
-          style={styles.actionIconButton} 
+        <TouchableOpacity
+          style={styles.actionIconButton}
           onPress={() => navigation.navigate('WorkspaceForm', { workspaceToEdit: item })}
         >
           <Pencil color="#666" size={20} />
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.actionIconButton} 
+        <TouchableOpacity
+          style={styles.actionIconButton}
           onPress={() => handleDelete(item.id, item.name)}
         >
           <Trash2 color="#ff4444" size={20} />
@@ -67,29 +63,22 @@ export default function WorkspacesScreen({ navigation }: any) {
           <Text style={styles.title}>Workspaces</Text>
           <Text style={styles.subtitle}>{user?.email}</Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
       </View>
 
       <View style={styles.listContainer}>
         {isLoading ? (
-          <View style={styles.center}>
-            <ActivityIndicator size="large" color="#000" />
-          </View>
+          <LoadingState message="Loading workspaces..." />
         ) : isError ? (
-          <View style={styles.center}>
-            <Text style={styles.errorText}>Failed to load workspaces.</Text>
-            <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
-              <Text style={styles.retryText}>Retry</Text>
-            </TouchableOpacity>
-          </View>
+          <ErrorState
+            message={error?.response?.data?.message || 'Failed to load workspaces'}
+            onRetry={refetch}
+          />
         ) : workspaces?.length === 0 ? (
-          <View style={styles.center}>
-            <Briefcase color="#ccc" size={48} style={{ marginBottom: 16 }} />
-            <Text style={styles.emptyTitle}>No workspaces yet</Text>
-            <Text style={styles.emptySubtitle}>Create a workspace to get started.</Text>
-          </View>
+          <EmptyState
+            icon={Briefcase}
+            title="No workspaces yet"
+            message="Create a workspace to get started"
+          />
         ) : (
           <FlatList
             data={workspaces}
@@ -103,7 +92,7 @@ export default function WorkspacesScreen({ navigation }: any) {
         )}
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('WorkspaceForm')}
       >

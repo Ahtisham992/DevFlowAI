@@ -112,6 +112,16 @@ npm install
 npm start -- --reset-cache
 ```
 
+```
+
+### 6. Run E2E Tests
+We use Playwright for robust End-to-End testing of our core web flows. Make sure both the backend and web frontend are running locally, then execute:
+```bash
+cd apps/web
+npm run test:e2e
+```
+This will run the test suite in headless Chromium mode and output a detailed HTML report.
+
 ---
 
 ## 📚 Documentation

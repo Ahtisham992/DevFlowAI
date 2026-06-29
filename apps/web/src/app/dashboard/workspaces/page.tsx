@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, FolderOpen } from 'lucide-react';
 import api from '@/lib/axios';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Workspace {
     id: string;
@@ -80,8 +81,8 @@ export default function WorkspacesPage() {
 
             {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="border rounded-xl p-4 h-32 animate-pulse bg-muted" />
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="rounded-xl h-32" />
                     ))}
                 </div>
             ) : workspaces.length === 0 ? (
