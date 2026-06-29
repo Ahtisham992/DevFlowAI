@@ -96,7 +96,9 @@ export class AuthService {
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.config.get<string>('JWT_REFRESH_SECRET') || 'default_refresh_secret',
+      secret:
+        this.config.get<string>('JWT_REFRESH_SECRET') ||
+        'default_refresh_secret',
       expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
     });
 
