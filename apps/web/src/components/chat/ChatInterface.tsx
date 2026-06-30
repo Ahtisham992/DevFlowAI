@@ -99,7 +99,8 @@ export function ChatInterface({ projectId }: { projectId?: string }) {
 
         try {
             const token = getCookie('accessToken');
-            const res = await fetch('http://localhost:3001/ai/chat/stream', {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            const res = await fetch(`${baseUrl}/ai/chat/stream`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
