@@ -4,9 +4,10 @@
   <p><strong>One workspace. Every developer workflow. Zero cloud dependency for AI.</strong></p>
 
   <p>
+    <a href="https://dev-flow-ai-five.vercel.app"><img src="https://img.shields.io/badge/Live_App-Vercel-black?logo=vercel" alt="Live App" /></a>
+    <a href="https://devflow-api-comy.onrender.com"><img src="https://img.shields.io/badge/API-Render-black?logo=render" alt="Live API" /></a>
     <img src="https://img.shields.io/badge/status-Production%20Ready-success" alt="Status" />
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
-    <img src="https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-lightgrey" alt="Platforms" />
   </p>
 </div>
 
@@ -28,12 +29,12 @@ DevFlow AI is built as a robust **Monorepo** using the latest enterprise-grade t
 
 | Layer | Technology | Description |
 |---|---|---|
-| **Web App** | Next.js 15, React 19, Tailwind CSS | App Router, Server Components, shadcn/ui components |
+| **Web App** | Next.js 15, React 19 (Hosted on **Vercel**) | App Router, Server Components, shadcn/ui components |
 | **Mobile App** | React Native CLI | Native iOS & Android application sharing the same core backend |
-| **Backend API** | NestJS | Modular architecture, WebSockets (Socket.io) for real-time progress |
-| **Database** | PostgreSQL 16 + pgvector | Relational data + Vector embeddings for semantic AI search |
-| **Cache & Auth** | Redis | JWT Token blacklisting and session management |
-| **AI Runtime** | Ollama | Local execution of Llama 3, Mistral, and Nomic Embeddings |
+| **Backend API** | NestJS (Hosted on **Render**) | Modular architecture, WebSockets for real-time progress |
+| **Database** | PostgreSQL + pgvector (Hosted on **Neon.tech**) | Relational data + Vector embeddings for semantic AI search |
+| **Cache & Auth** | Redis (Hosted on **Upstash**) | JWT Token blacklisting and session management |
+| **AI Runtime** | Ollama (Hosted on **Oracle Cloud VM**) | Remote execution of Llama 3 and Nomic Embeddings |
 | **ORM** | Prisma 7 | Type-safe database interactions and automated migrations |
 | **State** | Zustand + React Query | Global UI state management and server-data caching |
 
@@ -129,6 +130,7 @@ For an exhaustive, deep-dive look into how this system was built, please refer t
 - `DevFlowAI-Documentation_1.md`: Weeks 1-3 (Foundation & Auth)
 - `DevFlowAI-Documentation_2.md`: Weeks 4-10 (RAG, WebSockets, GitHub Indexing)
 - `DevFlowAI-Documentation_3.md`: Weeks 11-12 (Mobile App & Polish)
+- `DevFlowAI-Documentation_4.md`: Weeks 13-14 (Production Deployment, Neon, Render, Oracle Cloud, E2E & Load Testing)
 
 ---
 
