@@ -21,7 +21,7 @@ test.describe.serial('Authentication Flows', () => {
     await page.click('button[type="submit"]');
     
     // Wait for redirect to dashboard
-    await page.waitForURL('/dashboard');
+    await page.waitForURL('**/dashboard');
     
     // Verify successful login by checking for the welcome text
     await expect(page.locator('text=Welcome back')).toBeVisible();
@@ -38,7 +38,7 @@ test.describe.serial('Authentication Flows', () => {
     await page.click('button[type="submit"]');
     
     // Wait for redirect to dashboard
-    await page.waitForURL('/dashboard');
+    await page.waitForURL('**/dashboard');
     
     // Verify successful login
     await expect(page.locator('text=Welcome back')).toBeVisible();

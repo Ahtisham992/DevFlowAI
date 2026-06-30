@@ -13,7 +13,7 @@ test.describe.serial('Project Flows', () => {
     await page.fill('input[name="password"]', userPass);
     await page.fill('input[name="confirmPassword"]', userPass);
     await page.click('button[type="submit"]');
-    await page.waitForURL('/dashboard');
+    await page.waitForURL('**/dashboard');
 
     // 2. Create a workspace first
     await page.goto('/dashboard/workspaces');

@@ -18,7 +18,7 @@ test.describe('Workspace Flows', () => {
     await page.fill('input[name="password"]', userPass);
     await page.fill('input[name="confirmPassword"]', userPass);
     await page.click('button[type="submit"]');
-    await page.waitForURL('/dashboard');
+    await page.waitForURL('**/dashboard');
 
     // 2. Go to workspaces page
     await page.goto('/dashboard/workspaces');
