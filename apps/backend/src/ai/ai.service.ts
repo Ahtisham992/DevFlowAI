@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 
 interface OllamaResponse {
@@ -14,7 +15,10 @@ interface OllamaResponse {
 
 @Injectable()
 export class AiService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private config: ConfigService,
+  ) {}
 
   async streamChat(
     userId: string,
@@ -143,11 +147,14 @@ Use this context to inform your answer if it is relevant.`,
     );
 
     try {
-      const ollamaRes = await fetch('http://127.0.0.1:11434/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, messages, stream: true }),
-      });
+      const ollamaRes = await fetch(
+        `${this.config.get<string>('OLLAMA_URL') || 'http://127.0.0.1:11434'}/api/chat`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, messages, stream: true }),
+        },
+      );
 
       if (!ollamaRes.body) throw new Error('No body in response');
 
@@ -252,16 +259,19 @@ ${code}
 `;
 
     try {
-      const res = await fetch('http://127.0.0.1:11434/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model,
-          prompt,
-          format: 'json',
-          stream: false,
-        }),
-      });
+      const res = await fetch(
+        `${this.config.get<string>('OLLAMA_URL') || 'http://127.0.0.1:11434'}/api/generate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model,
+            prompt,
+            format: 'json',
+            stream: false,
+          }),
+        },
+      );
 
       if (!res.ok) throw new Error('Ollama request failed');
       const data = (await res.json()) as { response: string };
@@ -292,11 +302,19 @@ ${errorMessage}
 `;
 
     try {
-      const res = await fetch('http://127.0.0.1:11434/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, prompt, format: 'json', stream: false }),
-      });
+      const res = await fetch(
+        `${this.config.get<string>('OLLAMA_URL') || 'http://127.0.0.1:11434'}/api/generate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model,
+            prompt,
+            format: 'json',
+            stream: false,
+          }),
+        },
+      );
       if (!res.ok) throw new Error('Ollama request failed');
       const data = (await res.json()) as { response: string };
       return JSON.parse(data.response) as Record<string, unknown>;
@@ -321,11 +339,14 @@ ${code}
 `;
 
     try {
-      const res = await fetch('http://127.0.0.1:11434/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, prompt, stream: false }),
-      });
+      const res = await fetch(
+        `${this.config.get<string>('OLLAMA_URL') || 'http://127.0.0.1:11434'}/api/generate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, prompt, stream: false }),
+        },
+      );
       if (!res.ok) throw new Error('Ollama request failed');
       const data = (await res.json()) as { response: string };
       return { documentation: data.response };
@@ -337,11 +358,14 @@ ${code}
 
   async generateEmbeddings(text: string, model = 'nomic-embed-text') {
     try {
-      const res = await fetch('http://127.0.0.1:11434/api/embeddings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, prompt: text }),
-      });
+      const res = await fetch(
+        `${this.config.get<string>('OLLAMA_URL') || 'http://127.0.0.1:11434'}/api/embeddings`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, prompt: text }),
+        },
+      );
       if (!res.ok) throw new Error('Ollama embeddings request failed');
       const data = (await res.json()) as { embedding: number[] };
       return { embedding: data.embedding };
@@ -353,7 +377,9 @@ ${code}
 
   async getModels() {
     try {
-      const res = await fetch('http://127.0.0.1:11434/api/tags');
+      const res = await fetch(
+        `${this.config.get<string>('OLLAMA_URL') || 'http://127.0.0.1:11434'}/api/tags`,
+      );
       const data = (await res.json()) as { models: Array<{ name: string }> };
       return data.models || [];
     } catch {
