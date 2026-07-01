@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bot, Code, Zap, GitBranch, Terminal } from "lucide-react";
+import { ArrowRight, Bot, Code, Zap, GitBranch, Terminal, Smartphone } from "lucide-react";
 import ThemeToggle from "@/components/theme-toggle";
 import logoImage from "../../public/logo.png";
 import { useAuthStore } from "@/store/auth.store";
@@ -86,6 +86,14 @@ export default function Home() {
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all gap-2"
               >
                 Start Building Free <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="https://github.com/Ahtisham992/DevFlowAI/releases/latest/download/app-release.apk"
+                className="w-full sm:w-auto inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-foreground border border-primary/20 bg-primary/5 shadow-sm hover:bg-primary/10 transition-all gap-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Smartphone className="w-4 h-4" /> Download for Android
               </Link>
               <Link
                 href="/login"
