@@ -88,7 +88,7 @@ export default function Home() {
                 Start Building Free <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="https://github.com/Ahtisham992/DevFlowAI/releases/latest/download/app-release.apk"
+                href="https://github.com/Ahtisham992/DevFlowAI/releases/download/v1.0.0/app-release.apk"
                 className="w-full sm:w-auto inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-foreground border border-primary/20 bg-primary/5 shadow-sm hover:bg-primary/10 transition-all gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
