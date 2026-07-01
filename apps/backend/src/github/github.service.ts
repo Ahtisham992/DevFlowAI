@@ -16,6 +16,18 @@ export interface RepoMetadata {
 
 @Injectable()
 export class GithubService {
+  private getHeaders(isRaw: boolean = false): Record<string, string> {
+    const headers: Record<string, string> = {
+      'User-Agent': 'DevFlowAI',
+    };
+    if (!isRaw) {
+      headers['Accept'] = 'application/vnd.github.v3+json';
+    }
+    if (process.env.GITHUB_TOKEN) {
+      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+    return headers;
+  }
   /**
    * Parse a GitHub URL to extract the owner and repo name.
    */
@@ -44,12 +56,7 @@ export class GithubService {
     try {
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}`,
-        {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'DevFlowAI',
-          },
-        },
+        { headers: this.getHeaders() }
       );
 
       if (response.status === 404) {
@@ -99,12 +106,7 @@ export class GithubService {
     try {
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`,
-        {
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'DevFlowAI',
-          },
-        },
+        { headers: this.getHeaders() }
       );
 
       if (!response.ok) {
@@ -131,11 +133,7 @@ export class GithubService {
     try {
       const response = await fetch(
         `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`,
-        {
-          headers: {
-            'User-Agent': 'DevFlowAI',
-          },
-        },
+        { headers: this.getHeaders(true) }
       );
 
       if (!response.ok) {
