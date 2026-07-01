@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, FolderGit2, Edit } from 'lucide-react';
+import { Plus, Trash2, FolderGit2, Edit, Circle } from 'lucide-react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
