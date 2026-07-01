@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, FolderOpen } from 'lucide-react';
+import { Plus, Trash2, FolderOpen, Edit } from 'lucide-react';
 import api from '@/lib/axios';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,6 +19,14 @@ export default function WorkspacesPage() {
     const [showModal, setShowModal] = useState(false);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
+
+    const closeModal = () => {
+        setShowModal(false);
+        setEditingId(null);
+        setName('');
+        setDescription('');
+    };
 
     const { data: workspaces = [], isLoading } = useQuery({
         queryKey: ['workspaces'],
@@ -35,9 +43,18 @@ export default function WorkspacesPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-            setShowModal(false);
-            setName('');
-            setDescription('');
+            closeModal();
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: async () => {
+            const { data } = await api.patch(`/workspaces/${editingId}`, { name, description });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+            closeModal();
         },
     });
 
@@ -100,12 +117,25 @@ export default function WorkspacesPage() {
                                     <FolderOpen className="w-5 h-5 text-primary" />
                                     <h3 className="font-semibold">{ws.name}</h3>
                                 </div>
-                                <button
-                                    onClick={() => deleteMutation.mutate(ws.id)}
-                                    className="text-muted-foreground hover:text-red-500 transition"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => {
+                                            setEditingId(ws.id);
+                                            setName(ws.name);
+                                            setDescription(ws.description || '');
+                                            setShowModal(true);
+                                        }}
+                                        className="text-muted-foreground hover:text-primary transition p-1"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => deleteMutation.mutate(ws.id)}
+                                        className="text-muted-foreground hover:text-red-500 transition p-1"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                             {ws.description && (
                                 <p className="text-sm text-muted-foreground">{ws.description}</p>
@@ -122,7 +152,7 @@ export default function WorkspacesPage() {
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-background border rounded-xl p-6 w-full max-w-md space-y-4">
-                        <h2 className="text-lg font-bold">New Workspace</h2>
+                        <h2 className="text-lg font-bold">{editingId ? 'Edit Workspace' : 'New Workspace'}</h2>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Name</label>
                             <input
@@ -143,17 +173,17 @@ export default function WorkspacesPage() {
                         </div>
                         <div className="flex gap-2 justify-end">
                             <button
-                                onClick={() => setShowModal(false)}
+                                onClick={closeModal}
                                 className="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={() => createMutation.mutate()}
-                                disabled={!name || createMutation.isPending}
-                                className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                                onClick={() => editingId ? updateMutation.mutate() : createMutation.mutate()}
+                                disabled={!name || createMutation.isPending || updateMutation.isPending}
+                                className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition disabled:opacity-50"
                             >
-                                {createMutation.isPending ? 'Creating...' : 'Create'}
+                                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingId ? 'Save Changes' : 'Create Workspace')}
                             </button>
                         </div>
                     </div>

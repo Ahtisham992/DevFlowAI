@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Send, Bot, User, PlusCircle, MessageSquare, Loader2, Square } from 'lucide-react';
+import { Send, Bot, User, PlusCircle, MessageSquare, Loader2, Square, Trash2 } from 'lucide-react';
 import api from '@/lib/axios';
 import { cn } from '@/lib/utils';
 
@@ -218,6 +218,25 @@ export function ChatInterface({ projectId }: { projectId?: string }) {
 
             {/* Chat Area */}
             <div className="flex-1 flex flex-col relative">
+                {conversationId && (
+                    <div className="absolute top-4 right-4 z-10">
+                        <button
+                            onClick={() => {
+                                if (window.confirm('Are you sure you want to clear this chat history?')) {
+                                    api.delete(`/ai/conversations/${conversationId}`).then(() => {
+                                        setMessages([]);
+                                        setConversationId(null);
+                                        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+                                    });
+                                }
+                            }}
+                            className="p-2 bg-background/80 backdrop-blur border text-muted-foreground hover:text-red-500 rounded-lg shadow-sm transition"
+                            title="Clear Chat History"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
                 {messages.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8">
                         <Bot className="w-16 h-16 mb-4 opacity-20" />
