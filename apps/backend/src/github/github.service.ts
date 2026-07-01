@@ -56,7 +56,7 @@ export class GithubService {
     try {
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}`,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders() },
       );
 
       if (response.status === 404) {
@@ -106,7 +106,7 @@ export class GithubService {
     try {
       const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`,
-        { headers: this.getHeaders() }
+        { headers: this.getHeaders() },
       );
 
       if (!response.ok) {
@@ -133,7 +133,7 @@ export class GithubService {
     try {
       const response = await fetch(
         `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`,
-        { headers: this.getHeaders(true) }
+        { headers: this.getHeaders(true) },
       );
 
       if (!response.ok) {
