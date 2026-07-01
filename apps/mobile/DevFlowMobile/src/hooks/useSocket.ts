@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/auth.store';
 import { Platform, Alert } from 'react-native';
 
-const SOCKET_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
+const SOCKET_URL = 'https://devflow-api-comy.onrender.com';
 
 export const useSocket = () => {
   const socketRef = useRef<Socket | null>(null);
