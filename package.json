@@ -6,6 +6,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "jimp": "^1.6.1"
+    "jimp": "^1.6.1",
+    "sharp": "^0.35.3"
   }
 }
