@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, FolderGit2, Circle } from 'lucide-react';
+import { Plus, Trash2, FolderGit2, Edit } from 'lucide-react';
 import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,6 +35,16 @@ export default function ProjectsPage() {
     const [description, setDescription] = useState('');
     const [githubUrl, setGithubUrl] = useState('');
     const [workspaceId, setWorkspaceId] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
+
+    const closeModal = () => {
+        setShowModal(false);
+        setEditingId(null);
+        setName('');
+        setDescription('');
+        setGithubUrl('');
+        setWorkspaceId('');
+    };
 
     const router = useRouter();
 
@@ -66,11 +76,23 @@ export default function ProjectsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects'] });
-            setShowModal(false);
-            setName('');
-            setDescription('');
-            setGithubUrl('');
-            setWorkspaceId('');
+            closeModal();
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: async () => {
+            const { data } = await api.patch(`/projects/${editingId}`, {
+                name,
+                description,
+                githubUrl,
+                workspaceId,
+            });
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects'] });
+            closeModal();
         },
     });
 
@@ -137,15 +159,31 @@ export default function ProjectsPage() {
                                     <FolderGit2 className="w-5 h-5 text-primary" />
                                     <h3 className="font-semibold">{project.name}</h3>
                                 </div>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteMutation.mutate(project.id);
-                                    }}
-                                    className="text-muted-foreground hover:text-red-500 transition"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingId(project.id);
+                                            setName(project.name);
+                                            setDescription(project.description || '');
+                                            setGithubUrl(project.githubUrl || '');
+                                            setWorkspaceId(project.workspaceId);
+                                            setShowModal(true);
+                                        }}
+                                        className="text-muted-foreground hover:text-primary transition p-1"
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteMutation.mutate(project.id);
+                                        }}
+                                        className="text-muted-foreground hover:text-red-500 transition p-1"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                             {project.description && (
                                 <p className="text-sm text-muted-foreground">
@@ -174,7 +212,7 @@ export default function ProjectsPage() {
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-background border rounded-xl p-6 w-full max-w-md space-y-4">
-                        <h2 className="text-lg font-bold">New Project</h2>
+                        <h2 className="text-lg font-bold">{editingId ? 'Edit Project' : 'New Project'}</h2>
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Workspace</label>
@@ -224,17 +262,17 @@ export default function ProjectsPage() {
 
                         <div className="flex gap-2 justify-end">
                             <button
-                                onClick={() => setShowModal(false)}
+                                onClick={closeModal}
                                 className="px-4 py-2 text-sm border rounded-lg hover:bg-muted transition"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={() => createMutation.mutate()}
-                                disabled={!name || !workspaceId || createMutation.isPending}
-                                className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition"
+                                onClick={() => editingId ? updateMutation.mutate() : createMutation.mutate()}
+                                disabled={!name || !workspaceId || createMutation.isPending || updateMutation.isPending}
+                                className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition disabled:opacity-50"
                             >
-                                {createMutation.isPending ? 'Creating...' : 'Create'}
+                                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : (editingId ? 'Save Changes' : 'Create Project')}
                             </button>
                         </div>
                     </div>
