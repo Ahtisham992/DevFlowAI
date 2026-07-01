@@ -25,7 +25,7 @@ export default function ChatScreen({ route, navigation }: any) {
     if (projectId) {
       const fetchProjectConv = async () => {
         try {
-          const baseURL = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
+          const baseURL = 'https://devflow-api-comy.onrender.com';
           const res = await fetch(`${baseURL}/ai/projects/${projectId}/conversation`, {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -61,7 +61,7 @@ export default function ChatScreen({ route, navigation }: any) {
     setMessages((prev) => [...prev, userMsg, botMsg]);
     setIsStreaming(true);
 
-    const baseURL = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
+    const baseURL = 'https://devflow-api-comy.onrender.com';
     
     const es = new EventSource(`${baseURL}/ai/chat/stream`, {
       headers: {
