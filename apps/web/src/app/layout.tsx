@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'DevFlow AI',
   description: 'AI-powered developer workspace',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
